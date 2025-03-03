@@ -1,3 +1,4 @@
 Flask
 experta
 gunicorn
+frozendict==2.3.8

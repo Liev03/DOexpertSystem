@@ -1,6 +1,8 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
+from flask import Flask, jsonify
+from flask_cors import CORS
 from experta import *
+import mysql.connector
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # Allow all origins
@@ -12,7 +14,7 @@ class WaterQuality(Fact):
     salinity = Field(float)
     ammonia = Field(float)
     dissolved_oxygen = Field(float)
-    time_of_day = Field(str)  # "day" or "night"
+    time_of_day = Field(str)
 
 class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
@@ -28,7 +30,7 @@ class OxygenPredictor(KnowledgeEngine):
         """Store recommendation messages"""
         self.recommendations.append(message)
 
-    # 🚨 Temperature & Oxygen Rules
+    # AI Rules as you defined
     @Rule(WaterQuality(temperature=P(lambda t: t > 30), dissolved_oxygen=P(lambda o: o < 4)))
     def critical_oxygen_drop(self):
         self.add_warning("🚨 High temperature detected! Oxygen depletion is critical.")
@@ -44,7 +46,6 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_warning("⚠️ Low temperature detected! Fish metabolism slows down.")
         self.add_recommendation("Adjust feeding schedules and monitor fish activity.")
 
-    # 🌊 Salinity & Oxygen Rules
     @Rule(WaterQuality(salinity=P(lambda s: s > 40)))
     def high_salinity_risk(self):
         self.add_warning("⚠️ High salinity detected! Oxygen solubility decreases, increasing fish stress.")
@@ -55,7 +56,6 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_warning("🚨 High temperature & salinity detected! Oxygen loss is accelerated.")
         self.add_recommendation("Increase aeration and add freshwater.")
 
-    # ☠️ Ammonia Impact on Oxygen
     @Rule(WaterQuality(ammonia=P(lambda a: a > 0.5), dissolved_oxygen=P(lambda o: o < 4)))
     def ammonia_stress_oxygen_drop(self):
         self.add_warning("🚨 High ammonia & low oxygen detected! Fish stress is critical.")
@@ -66,7 +66,6 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_warning("⚠️ Severe ammonia toxicity detected! Oxygen demand increased.")
         self.add_recommendation("Improve filtration, remove organic waste, and reduce stocking density.")
 
-    # 🫧 Dissolved Oxygen Levels
     @Rule(WaterQuality(dissolved_oxygen=P(lambda o: o < 5)))
     def low_oxygen_warning(self):
         self.add_warning("🚨 Low oxygen detected! Aeration needed.")
@@ -82,7 +81,6 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_warning("⚠️ Excess oxygen detected! Risk of gas bubble disease.")
         self.add_recommendation("Reduce aeration and monitor fish behavior.")
 
-    # 🌙 Night-Time Oxygen Depletion & Algae Effects
     @Rule(WaterQuality(time_of_day="night", dissolved_oxygen=P(lambda o: o < 5)))
     def night_oxygen_depletion(self):
         self.add_warning("⚠️ Night-time oxygen drop detected! Algae respiration may be depleting oxygen.")
@@ -93,34 +91,73 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_warning("🚨 Night-time oxygen depletion & ammonia toxicity detected! Immediate action required.")
         self.add_recommendation("Increase nighttime aeration and reduce organic waste.")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.json
-        processed_data = {
-            "temperature": float(data["temperature"]),
-            "pH": float(data["pH"]),
-            "salinity": float(data["salinity"]),
-            "ammonia": float(data["ammonia"]),
-            "dissolved_oxygen": float(data["dissolved_oxygen"]),
-            "time_of_day": data["time_of_day"].lower()
+# Function to fetch the latest sensor data from the database
+def fetch_sensor_data():
+    # Database connection
+    conn = mysql.connector.connect(
+        host='localhost',
+        user='u790191610_bryan',
+        password='Baklasiliam123',
+        database='u790191610_aqualensedb'
+    )
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM sensor_data ORDER BY LAST_SAVED DESC LIMIT 1")
+    row = cursor.fetchone()
+    
+    # Extract the latest data from the row
+    if row:
+        temperature = float(row[3])  # TEMPERATURE column
+        ph_level = float(row[2])  # PH_LEVEL column
+        ammonia_level = float(row[4])  # AMMONIA_LEVEL column
+        dissolved_oxygen = float(row[5])  # DO_LEVEL column
+        salinity_level = float(row[6])  # SALINITY_LEVEL column
+        last_saved = row[7]  # LAST_SAVED column
+
+        # Determine time of day based on last saved timestamp
+        time_of_day = determine_time_of_day(last_saved)
+
+        # Return the processed data
+        return {
+            "temperature": temperature,
+            "pH": ph_level,
+            "salinity": salinity_level,
+            "ammonia": ammonia_level,
+            "dissolved_oxygen": dissolved_oxygen,
+            "time_of_day": time_of_day
         }
 
-        if processed_data["time_of_day"] not in ["day", "night"]:
-            return jsonify({"error": "Invalid time_of_day. Use 'day' or 'night'."}), 400
+    cursor.close()
+    conn.close()
+    return None
 
-    except (ValueError, TypeError, KeyError):
-        return jsonify({"error": "Invalid input data format"}), 400
+# Function to determine whether it's day or night
+def determine_time_of_day(last_saved):
+    last_saved_time = datetime.strptime(last_saved, '%Y-%m-%d %H:%M:%S')
+    if 6 <= last_saved_time.hour < 18:
+        return "day"
+    else:
+        return "night"
 
-    # Run expert system
-    engine = OxygenPredictor()
-    engine.reset()
-    engine.declare(WaterQuality(**processed_data))
-    engine.run()
+@app.route('/predict', methods=['GET'])
+def predict():
+    # Fetch the latest sensor data from the database
+    sensor_data = fetch_sensor_data()
+    
+    if sensor_data:
+        # Initialize the AI engine and process the data
+        engine = OxygenPredictor()
+        engine.reset()
+        engine.declare(WaterQuality(**sensor_data))
+        engine.run()
 
-    return jsonify({"warnings": engine.warnings, "recommendations": engine.recommendations})
+        # Return AI warnings and recommendations
+        return jsonify({
+            "warnings": engine.warnings,
+            "recommendations": engine.recommendations
+        })
+    else:
+        return jsonify({"error": "No data found in the database."}), 400
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if PORT is not set
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)

@@ -3,4 +3,3 @@ flask_cors
 experta
 gunicorn
 frozendict==2.3.8
-mysql-connector-python

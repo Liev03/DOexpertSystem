@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
 from experta import *
 
 app = Flask(__name__)
+CORS(app)  # Allow all origins
 
 class WaterQuality(Fact):
     """Fact model for water quality conditions"""

@@ -1,104 +1,89 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from experta import *
+from experta import KnowledgeEngine, Rule, Fact, P
 
 app = Flask(__name__)
-CORS(app)
-
-class WaterQuality(Fact):
-    """Fact model for water quality conditions"""
-    temperature = Field(float)
-    pH = Field(float)
-    salinity = Field(float)
-    ammonia = Field(float)
-    dissolved_oxygen = Field(float)
-    time_of_day = Field(str)  # "day" or "night"
+CORS(app)  # Enable CORS for frontend access
 
 class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
         self.most_critical_warning = None
         self.most_critical_recommendation = None
-        self.highest_priority = -1  # Track highest salience encountered
+        self.highest_priority = -1  # Track highest priority rule triggered
 
-    def set_warning(self, message, priority):
-        """Store the highest-priority warning only"""
+    def add_warning(self, message, priority):
         if priority > self.highest_priority:
             self.most_critical_warning = message
-            self.highest_priority = priority
+            self.highest_priority = priority  # Update priority
 
-    def set_recommendation(self, message, priority):
-        """Store the highest-priority recommendation only"""
-        if priority > self.highest_priority:
+    def add_recommendation(self, message, priority):
+        if priority >= self.highest_priority:  # Ensure matching recommendation
             self.most_critical_recommendation = message
 
-    # 🚨 CRITICAL WARNINGS (Highest Priority)
-    @Rule(WaterQuality(temperature=P(lambda t: t > 35), dissolved_oxygen=P(lambda o: o < 3)), salience=10)
-    def extreme_heat_danger(self):
-        self.set_warning("🔥 Extreme heat! Fish may be gasping due to oxygen depletion.", 10)
-        self.set_recommendation("Increase aeration and provide shade. Consider a partial water exchange.", 10)
+    # === Oxygen Rules ===
+    @Rule(Fact(dissolved_oxygen=P(lambda x: x < 3)))
+    def critically_low_oxygen(self):
+        self.add_warning("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.", priority=3)
+        self.add_recommendation("Immediately activate aerators or increase water circulation.", priority=3)
 
-    @Rule(WaterQuality(dissolved_oxygen=P(lambda o: o < 3)), salience=9)
-    def critical_low_oxygen(self):
-        self.set_warning("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.", 9)
-        self.set_recommendation("Immediately activate aerators or increase water circulation.", 9)
+    @Rule(Fact(dissolved_oxygen=P(lambda x: 3 <= x < 5)))
+    def low_oxygen(self):
+        self.add_warning("📉 Oxygen is lower than ideal. Fish may experience mild stress.", priority=2)
+        self.add_recommendation("Increase aeration, especially during warm periods.", priority=2)
 
-    @Rule(WaterQuality(ammonia=P(lambda a: a > 1)), salience=8)
-    def severe_ammonia_toxicity(self):
-        self.set_warning("☠️ Dangerous ammonia levels! Fish gills may be inflamed.", 8)
-        self.set_recommendation("Perform a 30-50% water change and check for excess waste.", 8)
+    @Rule(Fact(dissolved_oxygen=P(lambda x: x > 8)))
+    def excessive_oxygen(self):
+        self.add_warning("🌊 Excessive dissolved oxygen detected! Potential gas bubble disease risk.", priority=1)
+        self.add_recommendation("Reduce aeration and monitor fish closely.", priority=1)
 
-    # ⚠️ MODERATE WARNINGS (Medium Priority)
-    @Rule(WaterQuality(temperature=P(lambda t: t > 30), dissolved_oxygen=P(lambda o: o < 4)), salience=6)
-    def critical_oxygen_drop(self):
-        self.set_warning("🌡️ High temperature + low oxygen! Fish stress levels rising.", 6)
-        self.set_recommendation("Increase aeration and monitor fish closely.", 6)
+    # === Temperature Rules ===
+    @Rule(Fact(temperature=P(lambda x: x < 20)))
+    def cold_water(self):
+        self.add_warning("❄️ Cold water detected! Fish metabolism slows down in low temperatures.", priority=1)
+        self.add_recommendation("Adjust feeding schedule and avoid sudden temperature fluctuations.", priority=1)
 
-    @Rule(WaterQuality(ammonia=P(lambda a: a > 0.5), dissolved_oxygen=P(lambda o: o < 4)), salience=5)
-    def ammonia_stress_oxygen_drop(self):
-        self.set_warning("⚠️ Ammonia + low oxygen detected! Fish are at risk of suffocation.", 5)
-        self.set_recommendation("Reduce feeding, add aeration, and perform a partial water change.", 5)
+    @Rule(Fact(temperature=P(lambda x: x > 30)))
+    def high_temperature(self):
+        self.add_warning("🔥 High water temperature detected! Oxygen levels may drop.", priority=2)
+        self.add_recommendation("Increase aeration and monitor fish behavior closely.", priority=2)
 
-    # ℹ️ LOW-PRIORITY WARNINGS (Mild Concerns)
-    @Rule(WaterQuality(dissolved_oxygen=P(lambda o: o < 5)), salience=2)
-    def low_oxygen_warning(self):
-        self.set_warning("📉 Oxygen is lower than ideal. Monitor fish closely.", 2)
-        self.set_recommendation("Increase aeration, especially during warmer hours.", 2)
+    # === Ammonia Rules ===
+    @Rule(Fact(ammonia=P(lambda x: x > 0.5)))
+    def high_ammonia(self):
+        self.add_warning("☠️ High ammonia levels detected! Fish health is at risk.", priority=3)
+        self.add_recommendation("Perform partial water changes and check filtration systems.", priority=3)
 
-    @Rule(WaterQuality(temperature=P(lambda t: t < 15)), salience=1)
-    def low_temp_slow_metabolism(self):
-        self.set_warning("🥶 Cold water detected! Fish metabolism is slowing down.", 1)
-        self.set_recommendation("Adjust feeding schedule and avoid sudden temperature changes.", 1)
+    # === pH Rules ===
+    @Rule(Fact(pH=P(lambda x: x < 6)))
+    def low_pH(self):
+        self.add_warning("🔴 Low pH detected! Water is too acidic.", priority=2)
+        self.add_recommendation("Add buffering agents like crushed coral or baking soda.", priority=2)
+
+    @Rule(Fact(pH=P(lambda x: x > 8.5)))
+    def high_pH(self):
+        self.add_warning("🟢 High pH detected! Water is too alkaline.", priority=2)
+        self.add_recommendation("Use pH-lowering treatments like peat moss or driftwood.", priority=2)
+
+    # === Salinity Rules ===
+    @Rule(Fact(salinity=P(lambda x: x > 10)))  # Adjust based on your ideal range
+    def high_salinity(self):
+        self.add_warning("⚠️ High salinity detected! Water may not be suitable for freshwater species.", priority=1)
+        self.add_recommendation("Dilute with fresh water to lower salinity.", priority=1)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.json
-        processed_data = {
-            "temperature": float(data["temperature"]),
-            "pH": float(data["pH"]),
-            "salinity": float(data["salinity"]),
-            "ammonia": float(data["ammonia"]),
-            "dissolved_oxygen": float(data["dissolved_oxygen"]),
-            "time_of_day": data["time_of_day"].lower()
-        }
+    data = request.json
+    predictor = OxygenPredictor()
+    predictor.reset()
+    predictor.declare(Fact(**data))
+    predictor.run()
 
-        if processed_data["time_of_day"] not in ["day", "night"]:
-            return jsonify({"error": "Invalid time_of_day. Use 'day' or 'night'."}), 400
-
-    except (ValueError, TypeError, KeyError):
-        return jsonify({"error": "Invalid input data format"}), 400
-
-    # Run expert system
-    engine = OxygenPredictor()
-    engine.reset()
-    engine.declare(WaterQuality(**processed_data))
-    engine.run()
-
-    return jsonify({
-        "warning": engine.most_critical_warning or "No critical issues detected.",
-        "recommendation": engine.most_critical_recommendation or "No immediate action needed."
-    })
+    result = {
+        "warnings": [predictor.most_critical_warning] if predictor.most_critical_warning else [],
+        "recommendations": [predictor.most_critical_recommendation] if predictor.most_critical_recommendation else []
+    }
+    return jsonify(result)
 
 if __name__ == '__main__':
     import os

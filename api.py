@@ -31,7 +31,7 @@ class OxygenPredictor(KnowledgeEngine):
         })
 
     def finalize_decision(self):
-        """Selects the two most relevant issues and merges their recommendations appropriately."""
+        """Selects two most relevant warnings and merges their recommendations into one."""
         if not self.relevant_issues:
             self.positive_feedback.append({
                 "message": "✅ All water parameters are in optimal range!",
@@ -54,13 +54,9 @@ class OxygenPredictor(KnowledgeEngine):
         # Extract warnings
         self.most_relevant_warnings = [issue["warning"] for issue in selected_issues]
 
-        # Extract & merge recommendations (remove duplicates)
-        unique_recommendations = set()
-        for issue in selected_issues:
-            unique_recommendations.add(issue["recommendation"])
-
-        # Convert set back to list
-        self.most_relevant_recommendations = list(unique_recommendations)
+        # Merge recommendations into a single paragraph (remove duplicates)
+        unique_recommendations = set(issue["recommendation"] for issue in selected_issues)
+        self.most_relevant_recommendations = " ".join(unique_recommendations)  # Merged into one string
 
         # Handle positive feedback
         self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
@@ -144,7 +140,7 @@ def predict():
 
     result = {
         "warnings": predictor.most_relevant_warnings,
-        "recommendations": predictor.most_relevant_recommendations,
+        "recommendations": [predictor.most_relevant_recommendations],  # Single string instead of separate items
         "positive_feedback": predictor.positive_messages,
         "positive_suggestions": predictor.positive_suggestions
     }

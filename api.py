@@ -10,21 +10,21 @@ CORS(app)  # Enable CORS for frontend access
 class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
-        self.issues_by_category = {}  # Store warnings per category
-        self.recommendations_by_category = {}  # Store merged recommendations per category
-        self.positive_feedback = []  # Store positive messages
+        self.relevant_issues = []  # Stores detected issues
+        self.positive_feedback = []  # Stores positive messages
 
     def add_issue(self, warning, recommendation, severity, category):
-        """Groups warnings and merges recommendations by category."""
-        if category not in self.issues_by_category:
-            self.issues_by_category[category] = []
-            self.recommendations_by_category[category] = set()  # Use set to remove duplicates
-        
-        self.issues_by_category[category].append(warning)
-        self.recommendations_by_category[category].add(recommendation)  # Avoid duplicate actions
-
+        """Adds an issue while ensuring uniqueness of recommendations."""
+        if not any(issue['warning'] == warning for issue in self.relevant_issues):
+            self.relevant_issues.append({
+                "warning": warning,
+                "recommendation": recommendation,
+                "severity": severity,
+                "category": category
+            })
+    
     def add_positive_feedback(self, message, suggestion, category):
-        """Stores positive feedback when water parameters are within a healthy range."""
+        """Adds positive feedback when water parameters are within a healthy range."""
         self.positive_feedback.append({
             "message": message,
             "suggestion": suggestion,
@@ -32,31 +32,46 @@ class OxygenPredictor(KnowledgeEngine):
         })
 
     def finalize_decision(self):
-        """Combines multiple warnings per category and merges recommendations into one per category."""
-        if not self.issues_by_category:
+        """Selects two most relevant warnings and merges their recommendations."""
+        if not self.relevant_issues:
             self.positive_feedback.append({
                 "message": "✅ All water parameters are in optimal range!",
                 "suggestion": "Maintain regular monitoring and continue good pond management practices.",
                 "category": "overall"
             })
 
-        # Prepare final output with grouped warnings and merged recommendations
-        self.most_relevant_warnings = []
-        self.most_relevant_recommendations = []
+        # Sort issues by severity (descending)
+        self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
+        selected_issues = []
+        seen_categories = set()
+        
+        for issue in self.relevant_issues:
+            if issue["category"] not in seen_categories:
+                selected_issues.append(issue)
+                seen_categories.add(issue["category"])
+            if len(selected_issues) == 2:
+                break
 
-        for category, warnings in self.issues_by_category.items():
-            # Add all warnings separately (no merging for warnings)
-            self.most_relevant_warnings.extend(warnings)
+        # Merge recommendations into one, avoiding redundancy
+        merged_recommendations = list(set(issue["recommendation"] for issue in selected_issues))
+        merged_warning = " & ".join(issue["warning"] for issue in selected_issues)
 
-            # Merge recommendations into a single sentence per category
-            merged_recommendation = " ".join(self.recommendations_by_category[category])
-            self.most_relevant_recommendations.append(merged_recommendation)
+        self.final_warnings = [{
+            "warning": merged_warning,
+            "recommendation": " ".join(merged_recommendations)
+        }] if selected_issues else []
+
+        # Handle positive feedback
+        self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
+        self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
         local_timezone = pytz.timezone("Asia/Manila")  # Set timezone to the Philippines
         now = datetime.datetime.now(local_timezone)
         hour = now.hour
+
+        print(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
 
         if 5 <= hour < 12:
             return "morning"
@@ -101,8 +116,8 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("🔥 High afternoon temperatures detected! Oxygen levels may drop.",
                            "Provide shade or increase water depth to reduce heat stress.", severity=3, category="temperature")
         else:
-            self.add_issue("🔥 High water temperature detected at night! Risk of fish stress.",
-                           "Increase aeration and monitor fish behavior.", severity=3, category="temperature")
+            self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
+                           "Increase aeration, provide shade, and monitor fish behavior.", severity=3, category="temperature")
 
     # === Ammonia Rules ===
     @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
@@ -127,10 +142,9 @@ def predict():
     predictor.finalize_decision()
 
     result = {
-        "warnings": predictor.most_relevant_warnings,
-        "recommendations": predictor.most_relevant_recommendations,  # Each category has one merged recommendation
-        "positive_feedback": [feedback["message"] for feedback in predictor.positive_feedback],
-        "positive_suggestions": [feedback["suggestion"] for feedback in predictor.positive_feedback]
+        "warnings": predictor.final_warnings,
+        "positive_feedback": predictor.positive_messages,
+        "positive_suggestions": predictor.positive_suggestions
     }
     return jsonify(result)
 

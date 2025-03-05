@@ -112,7 +112,7 @@ class OxygenPredictor(KnowledgeEngine):
                            "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
         else:
             self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Install aerators to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
     # === pH Rules ===
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))

@@ -44,7 +44,7 @@ class OxygenPredictor(KnowledgeEngine):
     @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 3)))
     def critically_low_oxygen(self, do):
         self.add_issue("⚠️ Dangerously low oxygen levels! Fish are at severe risk of suffocation.",
-                       "Immediately turn on aerators, reduce feeding, and check for organic waste buildup.", severity=5, category="oxygen")
+                       "Immediately turn on aerators or increase water circulation. Reduce feeding and check for organic waste buildup.", severity=5, category="oxygen")
 
     @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: 3 <= x < 5)))
     def low_oxygen(self, do):

@@ -11,6 +11,7 @@ class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
         self.issues = []  # Stores detected issues
+        self.positive_feedback = []  # Stores positive messages
 
     def add_issue(self, warning, recommendation, severity, category):
         """Adds an issue while ensuring diversity in categories."""
@@ -18,6 +19,14 @@ class OxygenPredictor(KnowledgeEngine):
             "warning": warning,
             "recommendation": recommendation,
             "severity": severity,
+            "category": category
+        })
+    
+    def add_positive_feedback(self, message, suggestion, category):
+        """Adds positive feedback when water parameters are within a healthy range."""
+        self.positive_feedback.append({
+            "message": message,
+            "suggestion": suggestion,
             "category": category
         })
 
@@ -29,7 +38,6 @@ class OxygenPredictor(KnowledgeEngine):
                 "recommendations": ["Maintain regular monitoring and continue good pond management practices."]
             }
 
-        # Sort by severity and group by category
         self.issues.sort(key=lambda x: x["severity"], reverse=True)
         grouped_issues = {}
 
@@ -37,7 +45,10 @@ class OxygenPredictor(KnowledgeEngine):
             category = issue["category"]
             if category in grouped_issues:
                 grouped_issues[category]["warning"] += f" {issue['warning']}"
-                grouped_issues[category]["recommendation"] += f" {issue['recommendation']}"
+                
+                # ✅ Merge similar recommendations to prevent duplicates
+                if issue["recommendation"] not in grouped_issues[category]["recommendation"]:
+                    grouped_issues[category]["recommendation"] += f" {issue['recommendation']}"
             else:
                 grouped_issues[category] = issue
 
@@ -50,9 +61,11 @@ class OxygenPredictor(KnowledgeEngine):
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
-        local_timezone = pytz.timezone("Asia/Manila")
+        local_timezone = pytz.timezone("Asia/Manila")  # Set timezone to the Philippines
         now = datetime.datetime.now(local_timezone)
         hour = now.hour
+
+        print(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
 
         if 5 <= hour < 12:
             return "morning"
@@ -79,6 +92,16 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_issue("📉 Oxygen is lower than ideal. Fish may experience mild stress.",
                        "Increase aeration and monitor oxygen levels during warm periods.", severity=3, category="oxygen")
 
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: 5 <= x <= 8)))
+    def optimal_oxygen(self, do):
+        self.add_positive_feedback("✅ Oxygen levels are within the optimal range!", 
+                                   "Maintain proper aeration and minimize excessive organic waste.", category="oxygen")
+    
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x > 8)))
+    def excessive_oxygen(self, do):
+        self.add_issue("🌊 Excessive dissolved oxygen detected! Potential gas bubble disease risk.",
+                       "Reduce aeration and monitor fish closely for signs of stress.", severity=2, category="oxygen")
+
     # === Temperature Rules ===
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 30)))
     def high_temperature(self, temp):
@@ -86,20 +109,17 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "afternoon":
             self.add_issue("🔥 High afternoon temperatures detected! Oxygen levels may drop.",
                            "Provide shade or increase water depth to reduce heat stress.", severity=3, category="temperature")
-        elif time_period == "night":
+        else:
             self.add_issue("🔥 High water temperature detected at night! Risk of fish stress.",
                            "Increase aeration and ensure proper water circulation to maintain oxygen levels.", severity=3, category="temperature")
-        else:
-            self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
-                           "Increase aeration and monitor fish behavior.", severity=3, category="temperature")
 
     # === Ammonia Rules ===
     @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
     def high_ammonia(self, amm):
         self.add_issue("☠️ High ammonia levels detected! Fish health is at risk.",
                        "Perform partial water changes, clean filters, and monitor feed intake.", severity=5, category="ammonia")
-
-    # === Oxygen Trend Rules ===
+    
+    # === Fixed Trend-Aware Oxygen Rule ===
     @Rule(Fact(previous_do=MATCH.prev_do), Fact(dissolved_oxygen=MATCH.current_do), 
           TEST(lambda prev_do, current_do: current_do < prev_do - 1))
     def oxygen_declining(self, current_do, prev_do):
@@ -114,6 +134,7 @@ def predict():
     predictor.declare(Fact(**data))
     predictor.run()
     result = predictor.finalize_decision()
+
     return jsonify(result)
 
 if __name__ == '__main__':

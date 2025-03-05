@@ -10,20 +10,21 @@ CORS(app)  # Enable CORS for frontend access
 class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
-        self.issues = []  # Stores detected issues
-        self.positive_feedback = []  # Stores positive messages
+        self.issues_by_category = {}  # Store warnings per category
+        self.recommendations_by_category = {}  # Store merged recommendations per category
+        self.positive_feedback = []  # Store positive messages
 
     def add_issue(self, warning, recommendation, severity, category):
-        """Adds an issue while ensuring diversity in categories."""
-        self.issues.append({
-            "warning": warning,
-            "recommendation": recommendation,
-            "severity": severity,
-            "category": category
-        })
-    
+        """Groups warnings and merges recommendations by category."""
+        if category not in self.issues_by_category:
+            self.issues_by_category[category] = []
+            self.recommendations_by_category[category] = set()  # Use set to remove duplicates
+        
+        self.issues_by_category[category].append(warning)
+        self.recommendations_by_category[category].add(recommendation)  # Avoid duplicate actions
+
     def add_positive_feedback(self, message, suggestion, category):
-        """Adds positive feedback when water parameters are within a healthy range."""
+        """Stores positive feedback when water parameters are within a healthy range."""
         self.positive_feedback.append({
             "message": message,
             "suggestion": suggestion,
@@ -31,41 +32,31 @@ class OxygenPredictor(KnowledgeEngine):
         })
 
     def finalize_decision(self):
-        """Groups issues by category and merges their recommendations."""
-        if not self.issues:
-            return {
-                "warnings": ["✅ All water parameters are in optimal range!"],
-                "recommendations": ["Maintain regular monitoring and continue good pond management practices."]
-            }
+        """Combines multiple warnings per category and merges recommendations into one per category."""
+        if not self.issues_by_category:
+            self.positive_feedback.append({
+                "message": "✅ All water parameters are in optimal range!",
+                "suggestion": "Maintain regular monitoring and continue good pond management practices.",
+                "category": "overall"
+            })
 
-        self.issues.sort(key=lambda x: x["severity"], reverse=True)
-        grouped_issues = {}
+        # Prepare final output with grouped warnings and merged recommendations
+        self.most_relevant_warnings = []
+        self.most_relevant_recommendations = []
 
-        for issue in self.issues:
-            category = issue["category"]
-            if category in grouped_issues:
-                grouped_issues[category]["warning"] += f" {issue['warning']}"
-                
-                # ✅ Merge similar recommendations to prevent duplicates
-                if issue["recommendation"] not in grouped_issues[category]["recommendation"]:
-                    grouped_issues[category]["recommendation"] += f" {issue['recommendation']}"
-            else:
-                grouped_issues[category] = issue
+        for category, warnings in self.issues_by_category.items():
+            # Add all warnings separately (no merging for warnings)
+            self.most_relevant_warnings.extend(warnings)
 
-        # Convert to a list format for API response
-        merged_issues = list(grouped_issues.values())
-        return {
-            "warnings": [issue["warning"] for issue in merged_issues],
-            "recommendations": [issue["recommendation"] for issue in merged_issues]
-        }
+            # Merge recommendations into a single sentence per category
+            merged_recommendation = " ".join(self.recommendations_by_category[category])
+            self.most_relevant_recommendations.append(merged_recommendation)
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
         local_timezone = pytz.timezone("Asia/Manila")  # Set timezone to the Philippines
         now = datetime.datetime.now(local_timezone)
         hour = now.hour
-
-        print(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
 
         if 5 <= hour < 12:
             return "morning"
@@ -111,7 +102,7 @@ class OxygenPredictor(KnowledgeEngine):
                            "Provide shade or increase water depth to reduce heat stress.", severity=3, category="temperature")
         else:
             self.add_issue("🔥 High water temperature detected at night! Risk of fish stress.",
-                           "Increase aeration and ensure proper water circulation to maintain oxygen levels.", severity=3, category="temperature")
+                           "Increase aeration and monitor fish behavior.", severity=3, category="temperature")
 
     # === Ammonia Rules ===
     @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
@@ -133,8 +124,14 @@ def predict():
     predictor.reset()
     predictor.declare(Fact(**data))
     predictor.run()
-    result = predictor.finalize_decision()
+    predictor.finalize_decision()
 
+    result = {
+        "warnings": predictor.most_relevant_warnings,
+        "recommendations": predictor.most_relevant_recommendations,  # Each category has one merged recommendation
+        "positive_feedback": [feedback["message"] for feedback in predictor.positive_feedback],
+        "positive_suggestions": [feedback["suggestion"] for feedback in predictor.positive_feedback]
+    }
     return jsonify(result)
 
 if __name__ == '__main__':

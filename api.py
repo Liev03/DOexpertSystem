@@ -3,9 +3,14 @@ from flask_cors import CORS
 from experta import KnowledgeEngine, Rule, Fact, P, MATCH, TEST
 import datetime
 import pytz
+import logging
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend access
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
@@ -77,7 +82,7 @@ class OxygenPredictor(KnowledgeEngine):
         now = datetime.datetime.now(local_timezone)
         hour = now.hour
 
-        print(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
+        logger.debug(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
 
         if 5 <= hour < 12:
             return "morning"
@@ -112,8 +117,12 @@ class OxygenPredictor(KnowledgeEngine):
     # === pH Rules ===
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))
     def low_ph(self, ph):
-        self.add_issue("⚠️ Low pH detected! Water is too acidic.",
-                       "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.", severity=3, category="ph")
+        if ph < 3.0:  # Extremely low pH
+            self.add_issue("⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
+                           "Immediately add agricultural lime or baking soda to raise pH. Perform a partial water change to dilute acidity.", severity=5, category="ph")
+        else:  # Moderately low pH
+            self.add_issue("⚠️ Low pH detected! Water is too acidic.",
+                           "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.", severity=3, category="ph")
 
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
@@ -129,6 +138,8 @@ class OxygenPredictor(KnowledgeEngine):
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
+    logger.debug(f"Received input data: {data}")  # Log input data for debugging
+
     predictor = OxygenPredictor()
     predictor.reset()
     predictor.declare(Fact(**data))
@@ -141,6 +152,7 @@ def predict():
         "positive_feedback": predictor.positive_messages,
         "positive_suggestions": predictor.positive_suggestions
     }
+    logger.debug(f"Generated result: {result}")  # Log result for debugging
     return jsonify(result)
 
 if __name__ == '__main__':

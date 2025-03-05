@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from experta import KnowledgeEngine, Rule, Fact, P, MATCH
+from experta import KnowledgeEngine, Rule, Fact, P, MATCH, TEST
 import datetime
 
 app = Flask(__name__)
@@ -13,11 +13,7 @@ class OxygenPredictor(KnowledgeEngine):
         self.positive_feedback = []  # Stores positive messages
 
     def add_issue(self, warning, recommendation, severity, category):
-        """
-        Adds an issue while ensuring diversity in categories.
-        - severity: Importance of the issue (higher = more serious).
-        - category: The parameter category (e.g., oxygen, ammonia, temperature, etc.).
-        """
+        """Adds an issue while ensuring diversity in categories."""
         self.relevant_issues.append({
             "warning": warning,
             "recommendation": recommendation,
@@ -113,8 +109,9 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_issue("☠️ High ammonia levels detected! Fish health is at risk.",
                        "Perform partial water changes, clean filters, and monitor feed intake.", severity=5, category="ammonia")
     
-    # === Trend-Aware Oxygen Rule ===
-    @Rule(Fact(previous_do=MATCH.prev_do), Fact(dissolved_oxygen=MATCH.current_do & P(lambda x, prev_do: x < prev_do - 1)))
+    # === Fixed Trend-Aware Oxygen Rule ===
+    @Rule(Fact(previous_do=MATCH.prev_do), Fact(dissolved_oxygen=MATCH.current_do), 
+          TEST(lambda prev_do, current_do: current_do < prev_do - 1))
     def oxygen_declining(self, current_do, prev_do):
         self.add_issue("⚠️ Oxygen levels are dropping! Preventive action needed.",
                        "Monitor aeration systems and avoid overstocking.", severity=3, category="oxygen")

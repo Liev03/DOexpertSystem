@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from experta import KnowledgeEngine, Rule, Fact, P, MATCH, TEST
 import datetime
+import pytz
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend access
@@ -55,13 +56,18 @@ class OxygenPredictor(KnowledgeEngine):
         self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
 
     def get_time_of_day(self):
-        """Returns the current time period (morning, afternoon, evening, night)."""
-        now = datetime.datetime.now().hour
-        if 5 <= now < 12:
+        """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
+        local_timezone = pytz.timezone("Asia/Manila")  # Set timezone to the Philippines
+        now = datetime.datetime.now(local_timezone)
+        hour = now.hour
+
+        print(f"Server Time: {now.strftime('%Y-%m-%d %H:%M:%S')} (Asia/Manila)")  # Log time for debugging
+
+        if 5 <= hour < 12:
             return "morning"
-        elif 12 <= now < 17:
+        elif 12 <= hour < 17:
             return "afternoon"
-        elif 17 <= now < 20:
+        elif 17 <= hour < 20:
             return "evening"
         else:
             return "night"

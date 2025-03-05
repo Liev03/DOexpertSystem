@@ -12,6 +12,7 @@ class OxygenPredictor(KnowledgeEngine):
         super().__init__()
         self.relevant_issues = []  # Stores detected issues
         self.positive_feedback = []  # Stores positive messages
+        self.historical_data = []  # Stores historical data for dynamic recommendations
 
     def add_issue(self, warning, recommendation, severity, category):
         """Adds an issue while ensuring diversity in categories."""
@@ -31,7 +32,7 @@ class OxygenPredictor(KnowledgeEngine):
         })
 
     def finalize_decision(self):
-        """Selects two most relevant warnings and merges their recommendations into one."""
+        """Selects two most relevant warnings and merges their recommendations into one coherent paragraph."""
         if not self.relevant_issues:
             self.positive_feedback.append({
                 "message": "✅ All water parameters are in optimal range!",
@@ -56,11 +57,44 @@ class OxygenPredictor(KnowledgeEngine):
 
         # Merge recommendations into a single paragraph (remove duplicates, improve flow)
         unique_recommendations = list(set(issue["recommendation"] for issue in selected_issues))
-        self.most_relevant_recommendations = " ".join(unique_recommendations)
+        
+        # Split recommendations into sentences and remove duplicates
+        all_sentences = []
+        for recommendation in unique_recommendations:
+            sentences = recommendation.split(". ")
+            for sentence in sentences:
+                if sentence.strip() and sentence not in all_sentences:  # Avoid empty strings and duplicates
+                    all_sentences.append(sentence.strip())
+
+        # Combine sentences into a single paragraph
+        self.most_relevant_recommendations = ". ".join(all_sentences) + "."  # Add a period at the end
+
+        # Add dynamic recommendations based on historical data
+        if self.historical_data:
+            dynamic_recommendation = self.generate_dynamic_recommendation()
+            if dynamic_recommendation:
+                self.most_relevant_recommendations += " " + dynamic_recommendation
 
         # Handle positive feedback
         self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
         self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
+
+    def generate_dynamic_recommendation(self):
+        """Generates dynamic recommendations based on historical data trends."""
+        if not self.historical_data:
+            return None
+
+        # Example: Check if oxygen levels have been consistently low
+        low_oxygen_count = sum(1 for data in self.historical_data if data.get("dissolved_oxygen", 0) < 3.0)
+        if low_oxygen_count > 2:  # If low oxygen detected more than twice historically
+            return "Historical data shows recurring low oxygen levels. Consider installing additional aeration systems."
+
+        # Example: Check if temperature has been consistently high
+        high_temp_count = sum(1 for data in self.historical_data if data.get("temperature", 0) > 30)
+        if high_temp_count > 2:  # If high temperature detected more than twice historically
+            return "Historical data indicates frequent high temperatures. Consider adding shade structures or increasing water depth."
+
+        return None
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
@@ -130,6 +164,11 @@ def predict():
     predictor.declare(Fact(**data))
     predictor.run()
     predictor.finalize_decision()
+
+    # Store current data in historical data (for dynamic recommendations)
+    predictor.historical_data.append(data)
+    if len(predictor.historical_data) > 10:  # Keep only the last 10 entries
+        predictor.historical_data.pop(0)
 
     result = {
         "warnings": predictor.most_relevant_warnings,

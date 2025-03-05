@@ -2,4 +2,5 @@ Flask
 flask_cors
 experta
 gunicorn
+pytz
 frozendict==2.3.8

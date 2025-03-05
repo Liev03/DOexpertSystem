@@ -1,4 +1,3 @@
-this is my previous code
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from experta import KnowledgeEngine, Rule, Fact, P, MATCH, TEST

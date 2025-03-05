@@ -41,54 +41,61 @@ class OxygenPredictor(KnowledgeEngine):
             self.most_relevant_recommendations = [issue["recommendation"] for issue in selected_issues]
 
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 2.5)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 3)))
     def critically_low_oxygen(self, do):
-        self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
-                       "Immediately activate aerators or increase water circulation.", severity=4, category="oxygen")
+        self.add_issue("⚠️ Dangerously low oxygen levels! Fish are at severe risk of suffocation.",
+                       "Immediately turn on aerators, reduce feeding, and check for organic waste buildup.", severity=5, category="oxygen")
 
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: 2.5 <= x < 5)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: 3 <= x < 5)))
     def low_oxygen(self, do):
-        self.add_issue("📉 Oxygen is lower than ideal. Fish may experience mild stress.",
-                       "Increase aeration, especially during warm periods.", severity=3, category="oxygen")
+        self.add_issue("📉 Low oxygen detected. Fish may show signs of stress.",
+                       "Increase aeration, reduce stocking density if necessary, and monitor water temperature.", severity=3, category="oxygen")
 
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x > 8)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x > 9)))
     def excessive_oxygen(self, do):
-        self.add_issue("🌊 Excessive dissolved oxygen detected! Potential gas bubble disease risk.",
-                       "Reduce aeration and monitor fish closely.", severity=2, category="oxygen")
+        self.add_issue("🌊 Excessive dissolved oxygen detected! Risk of gas bubble disease.",
+                       "Reduce aeration and monitor fish behavior for signs of distress.", severity=2, category="oxygen")
 
     # === Temperature Rules ===
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 20)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 18)))
     def cold_water(self, temp):
-        self.add_issue("❄️ Cold water detected! Fish metabolism slows down in low temperatures.",
-                       "Adjust feeding schedule and avoid sudden temperature fluctuations.", severity=2, category="temperature")
+        self.add_issue("❄️ Cold water detected! Fish metabolism slows down.",
+                       "Reduce feeding and consider adding thermal insulation if necessary.", severity=2, category="temperature")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 30)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 32)))
     def high_temperature(self, temp):
-        self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
-                       "Increase aeration and monitor fish behavior closely.", severity=3, category="temperature")
+        self.add_issue("🔥 High water temperature detected! Oxygen levels drop significantly.",
+                       "Increase aeration, provide shade, and avoid overfeeding.", severity=4, category="temperature")
 
     # === Ammonia Rules ===
     @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
     def high_ammonia(self, amm):
-        self.add_issue("☠️ High ammonia levels detected! Fish health is at risk.",
-                       "Perform partial water changes and check filtration systems.", severity=5, category="ammonia")
+        self.add_issue("☠️ High ammonia levels detected! Risk of fish poisoning.",
+                       "Perform a partial water change, improve filtration, and reduce uneaten feed.", severity=5, category="ammonia")
 
     # === pH Rules ===
-    @Rule(Fact(pH=MATCH.pH_val & P(lambda x: x < 6)))
+    @Rule(Fact(pH=MATCH.pH_val & P(lambda x: x < 6.5)))
     def low_pH(self, pH_val):
-        self.add_issue("🔴 Low pH detected! Water is too acidic.",
-                       "Add buffering agents like crushed coral or baking soda.", severity=2, category="pH")
+        self.add_issue("🔴 Low pH detected! Water is too acidic for optimal fish health.",
+                       "Add crushed coral or baking soda gradually to stabilize pH.", severity=3, category="pH")
 
     @Rule(Fact(pH=MATCH.pH_val & P(lambda x: x > 8.5)))
     def high_pH(self, pH_val):
         self.add_issue("🟢 High pH detected! Water is too alkaline.",
-                       "Use pH-lowering treatments like peat moss or driftwood.", severity=2, category="pH")
+                       "Use peat moss or introduce natural acids to lower pH levels.", severity=3, category="pH")
 
     # === Salinity Rules ===
     @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 10)))
     def high_salinity(self, sal):
-        self.add_issue("⚠️ High salinity detected! Water may not be suitable for freshwater species.",
-                       "Dilute with fresh water to lower salinity.", severity=1, category="salinity")
+        self.add_issue("⚠️ High salinity detected! May stress freshwater species.",
+                       "Gradually dilute with fresh water to restore balance.", severity=2, category="salinity")
+
+    # === Combination Rules ===
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 30)),
+          Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4)))
+    def high_temp_low_oxygen(self, temp, do):
+        self.add_issue("🔥 High temperature and low oxygen detected! Severe stress risk for fish.",
+                       "Increase aeration, provide shade, and consider a water change.", severity=5, category="oxygen")
 
 @app.route('/predict', methods=['POST'])
 def predict():

@@ -70,51 +70,11 @@ class OxygenPredictor(KnowledgeEngine):
                     unique_sentences.add(sentence.strip())
 
         # Combine sentences into a single paragraph
-        self.most_relevant_recommendations = self._structure_recommendations(unique_sentences)
+        self.most_relevant_recommendations = ". ".join(unique_sentences) + "."
 
         # Handle positive feedback
         self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
         self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
-
-    def _structure_recommendations(self, sentences):
-        """
-        Structures the recommendations into a readable, non-redundant paragraph.
-        """
-        # Group related actions
-        aeration_actions = []
-        feeding_actions = []
-        shading_actions = []
-        monitoring_actions = []
-        other_actions = []
-
-        for sentence in sentences:
-            if "aeration" in sentence.lower():
-                aeration_actions.append(sentence)
-            elif "feed" in sentence.lower() or "overfeed" in sentence.lower():
-                feeding_actions.append(sentence)
-            elif "shade" in sentence.lower():
-                shading_actions.append(sentence)
-            elif "monitor" in sentence.lower():
-                monitoring_actions.append(sentence)
-            else:
-                other_actions.append(sentence)
-
-        # Build the recommendation paragraph
-        recommendation = []
-
-        if aeration_actions:
-            recommendation.append("Increase aeration to improve oxygen levels. " + " ".join(aeration_actions[1:]))
-        if shading_actions:
-            recommendation.append("Provide shade to reduce heat stress. " + " ".join(shading_actions[1:]))
-        if feeding_actions:
-            recommendation.append("Avoid overfeeding fish, as uneaten food can consume oxygen. " + " ".join(feeding_actions[1:]))
-        if monitoring_actions:
-            recommendation.append("Monitor fish behavior closely for signs of stress. " + " ".join(monitoring_actions[1:]))
-        if other_actions:
-            recommendation.append(" ".join(other_actions))
-
-        # Join all parts into a single paragraph
-        return ". ".join(recommendation) + "."
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""

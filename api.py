@@ -107,7 +107,7 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 30)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
     def high_temperature(self, temp):
         time_period = self.get_time_of_day()
         if time_period == "afternoon":

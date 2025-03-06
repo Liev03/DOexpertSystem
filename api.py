@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from experta import KnowledgeEngine, Rule, Fact, P, MATCH, TEST
+from experta import KnowledgeEngine, Rule, Fact, P, MATCH
 import datetime
 import pytz
 import logging
@@ -38,39 +38,40 @@ class OxygenPredictor(KnowledgeEngine):
     def finalize_decision(self):
         """Selects two most relevant warnings and merges their recommendations into one."""
         if not self.relevant_issues:
+            # Only show the "all parameters are optimal" message if NO issues are detected
             self.positive_feedback.append({
                 "message": "✅ All water parameters are in optimal range!",
                 "suggestion": "Maintain regular monitoring and continue good pond management practices.",
                 "category": "overall"
             })
+        else:
+            # Sort issues by severity (descending)
+            self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
+            selected_issues = []
+            seen_categories = set()
+            
+            for issue in self.relevant_issues:
+                if issue["category"] not in seen_categories:
+                    selected_issues.append(issue)
+                    seen_categories.add(issue["category"])
+                if len(selected_issues) == 2:
+                    break
 
-        # Sort issues by severity (descending)
-        self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
-        selected_issues = []
-        seen_categories = set()
-        
-        for issue in self.relevant_issues:
-            if issue["category"] not in seen_categories:
-                selected_issues.append(issue)
-                seen_categories.add(issue["category"])
-            if len(selected_issues) == 2:
-                break
+            # Extract warnings
+            self.most_relevant_warnings = [issue["warning"] for issue in selected_issues]
 
-        # Extract warnings
-        self.most_relevant_warnings = [issue["warning"] for issue in selected_issues]
+            # Merge recommendations into a single paragraph (remove duplicates, improve flow)
+            all_recommendations = [issue["recommendation"] for issue in selected_issues]
+            unique_sentences = set()
 
-        # Merge recommendations into a single paragraph (remove duplicates, improve flow)
-        all_recommendations = [issue["recommendation"] for issue in selected_issues]
-        unique_sentences = set()
+            for recommendation in all_recommendations:
+                sentences = recommendation.split(". ")
+                for sentence in sentences:
+                    if sentence.strip() and sentence not in unique_sentences:  # Avoid empty strings and duplicates
+                        unique_sentences.add(sentence.strip())
 
-        for recommendation in all_recommendations:
-            sentences = recommendation.split(". ")
-            for sentence in sentences:
-                if sentence.strip() and sentence not in unique_sentences:  # Avoid empty strings and duplicates
-                    unique_sentences.add(sentence.strip())
-
-        # Combine sentences into a single paragraph
-        self.most_relevant_recommendations = ". ".join(unique_sentences) + "."
+            # Combine sentences into a single paragraph
+            self.most_relevant_recommendations = ". ".join(unique_sentences) + "."
 
         # Handle positive feedback
         self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
@@ -147,7 +148,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
-        logger.debug(f"High pH detected: {ph}")  # Log pH value for debugging
+        logger.debug(f"High pH rule triggered! pH level: {ph}")  # Log when the rule is triggered
         time_period = self.get_time_of_day()
         if time_period == "afternoon":
             self.add_issue("⚠️ High pH detected during the afternoon! Water is too alkaline.",
@@ -174,6 +175,18 @@ class OxygenPredictor(KnowledgeEngine):
 def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")  # Log input data for debugging
+
+    # Check if required keys are present
+    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity"]
+    for key in required_keys:
+        if key not in data:
+            logger.error(f"Missing key in input data: {key}")
+            return jsonify({"error": f"Missing key in input data: {key}"}), 400
+
+    # Check if ph_level is a valid number
+    if not isinstance(data["ph_level"], (int, float)):
+        logger.error(f"Invalid ph_level value: {data['ph_level']}")
+        return jsonify({"error": "ph_level must be a number!"}), 400
 
     predictor = OxygenPredictor()
     predictor.reset()

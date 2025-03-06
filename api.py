@@ -94,7 +94,7 @@ class OxygenPredictor(KnowledgeEngine):
             return "night"
 
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 2.5)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 1.3)))
     def critically_low_oxygen(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":
@@ -106,6 +106,11 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
+
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x > 12.0)))
+    def high_oxygen(self, do):
+        self.add_issue("⚠️ High oxygen levels detected! Potential risk to fish.",
+                       "Reduce aeration to bring oxygen levels back to optimal range.", severity=3, category="oxygen")
 
     # === Temperature Rules ===
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
@@ -122,7 +127,12 @@ class OxygenPredictor(KnowledgeEngine):
                            "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
         else:  # Nighttime
             self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Ensure water circulation to improve oxygen levels. Monitor fish behavior for signs of stress.", severity=3, category="temperature")
+
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 20)))
+    def low_temperature(self, temp):
+        self.add_issue("⚠️ Low temperature detected! Fish may become lethargic.",
+                       "Increase water temperature gradually using a heater or by reducing water flow.", severity=3, category="temperature")
 
     # === pH Rules ===
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))
@@ -158,6 +168,11 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
+
+    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x < 1.3)))
+    def low_salinity(self, sal):
+        self.add_issue("⚠️ Low salinity detected! Fish may struggle with osmoregulation.",
+                       "Gradually increase salinity using controlled salt addition.", severity=3, category="salinity")
 
 @app.route('/predict', methods=['POST'])
 def predict():

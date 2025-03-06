@@ -127,7 +127,7 @@ class OxygenPredictor(KnowledgeEngine):
                            "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
         else:  # Nighttime
             self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
-                           "Ensure water circulation to improve oxygen levels. Monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 20)))
     def low_temperature(self, temp):
@@ -147,13 +147,14 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
+        logger.debug(f"High pH detected: {ph}")  # Log pH value for debugging
         time_period = self.get_time_of_day()
         if time_period == "afternoon":
             self.add_issue("⚠️ High pH detected during the afternoon! Water is too alkaline.",
                            "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
         else:
             self.add_issue("⚠️ High pH detected! Water is too alkaline.",
-                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=4, category="ph")
+                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
     
     # === Salinity Rules ===
     @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 7)))
@@ -168,6 +169,11 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
+
+    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x < 1.3)))
+    def low_salinity(self, sal):
+        self.add_issue("⚠️ Low salinity detected! Fish may struggle with osmoregulation.",
+                       "Gradually increase salinity using controlled salt addition.", severity=3, category="salinity")
 
 @app.route('/predict', methods=['POST'])
 def predict():

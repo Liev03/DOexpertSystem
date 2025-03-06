@@ -122,15 +122,15 @@ class OxygenPredictor(KnowledgeEngine):
                            "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
         elif time_period == "morning":
             self.add_issue("🔥 High morning temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Increase aeration and circulate water to improve oxygen levels. Monitor fish behavior for signs of stress.", severity=3, category="temperature")
         elif time_period == "evening":
             self.add_issue("🔥 High evening temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Install aerators if available or circulate water to improve oxygen levels. Prevent water from becoming stagnant and monitor fish behavior for signs of stress.", severity=3, category="temperature")
         else:  # Nighttime
             self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Install aerators if available or circulate water to improve oxygen levels. increase aeration of water and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 20)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 23)))
     def low_temperature(self, temp):
         self.add_issue("⚠️ Low temperature detected! Fish may become lethargic.",
                        "Increase water temperature gradually using a heater or by reducing water flow.", severity=3, category="temperature")

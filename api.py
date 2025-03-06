@@ -171,13 +171,24 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
 
+    # === Ammonia Rules ===
+    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
+    def high_ammonia(self, amm):
+        time_period = self.get_time_of_day()
+        if amm > 2.0:  # Extremely high ammonia
+            self.add_issue("⚠️ Extremely high ammonia levels detected! Toxic to fish.",
+                           "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.", severity=5, category="ammonia")
+        else:  # Moderately high ammonia
+            self.add_issue("⚠️ High ammonia levels detected! Potential stress on fish.",
+                           "Perform a partial water change and increase aeration. Reduce feeding and remove any decaying organic matter.", severity=4, category="ammonia")
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")  # Log input data for debugging
 
     # Check if required keys are present
-    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity"]
+    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
     for key in required_keys:
         if key not in data:
             logger.error(f"Missing key in input data: {key}")

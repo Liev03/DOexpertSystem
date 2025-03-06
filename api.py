@@ -153,7 +153,7 @@ class OxygenPredictor(KnowledgeEngine):
                            "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
         else:
             self.add_issue("⚠️ High pH detected! Water is too alkaline.",
-                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
+                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=4, category="ph")
     
     # === Salinity Rules ===
     @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 7)))

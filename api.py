@@ -94,7 +94,7 @@ class OxygenPredictor(KnowledgeEngine):
             return "night"
 
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 1.3)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 2.5)))
     def critically_low_oxygen(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":
@@ -106,11 +106,6 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
-
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: 1.3 <= x <= 12.0)))
-    def optimal_oxygen(self, do):
-        self.add_positive_feedback("✅ Oxygen levels are optimal.",
-                                  "Maintain regular monitoring and continue good pond management practices.", category="oxygen")
 
     # === Temperature Rules ===
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
@@ -129,11 +124,6 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
                            "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x <= 33)))
-    def optimal_temperature(self, temp):
-        self.add_positive_feedback("✅ Temperature levels are optimal.",
-                                  "Maintain regular monitoring and continue good pond management practices.", category="temperature")
-
     # === pH Rules ===
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))
     def low_ph(self, ph):
@@ -144,11 +134,6 @@ class OxygenPredictor(KnowledgeEngine):
         else:  # Moderately low pH
             self.add_issue("⚠️ Low pH detected! Water is too acidic.",
                            "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.", severity=3, category="ph")
-
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: 6.5 <= x <= 8.5)))
-    def optimal_ph(self, ph):
-        self.add_positive_feedback("✅ pH levels are optimal.",
-                                  "Maintain regular monitoring and continue good pond management practices.", category="ph")
 
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
@@ -173,11 +158,6 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
-
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x <= 7)))
-    def optimal_salinity(self, sal):
-        self.add_positive_feedback("✅ Salinity levels are optimal.",
-                                  "Maintain regular monitoring and continue good pond management practices.", category="salinity")
 
 @app.route('/predict', methods=['POST'])
 def predict():

@@ -170,11 +170,6 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
 
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x < 1.3)))
-    def low_salinity(self, sal):
-        self.add_issue("⚠️ Low salinity detected! Fish may struggle with osmoregulation.",
-                       "Gradually increase salinity using controlled salt addition.", severity=3, category="salinity")
-
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json

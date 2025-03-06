@@ -100,6 +100,9 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue("⚠️ Nighttime oxygen depletion! Risk of fish suffocation.",
                            "Increase aeration at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.", severity=4, category="oxygen")
+        elif time_period == "afternoon":
+            self.add_issue("⚠️ Critically low oxygen levels during the day! Fish may be lethargic or surfacing.",
+                           "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
         else:
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
@@ -110,13 +113,17 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "afternoon":
             self.add_issue("🔥 High afternoon temperatures detected! Oxygen levels may drop.",
                            "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
+        elif time_period == "morning":
+            self.add_issue("🔥 High morning temperatures detected! Oxygen levels may drop.",
+                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
         else:
             self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
-                           "Install aerators to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
     # === pH Rules ===
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))
     def low_ph(self, ph):
+        time_period = self.get_time_of_day()
         if ph < 3.0:  # Extremely low pH
             self.add_issue("⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
                            "Immediately add agricultural lime or baking soda to raise pH. Perform a partial water change to dilute acidity.", severity=5, category="ph")
@@ -126,14 +133,24 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
-        self.add_issue("⚠️ High pH detected! Water is too alkaline.",
-                       "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
+        time_period = self.get_time_of_day()
+        if time_period == "afternoon":
+            self.add_issue("⚠️ High pH detected during the afternoon! Water is too alkaline.",
+                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
+        else:
+            self.add_issue("⚠️ High pH detected! Water is too alkaline.",
+                           "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
     
     # === Salinity Rules ===
     @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 15)))
     def high_salinity(self, sal):
-        self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
-                       "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue("⚠️ High salinity detected in the morning! Potential stress on freshwater fish.",
+                           "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
+        else:
+            self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",
+                           "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
 
 @app.route('/predict', methods=['POST'])
 def predict():

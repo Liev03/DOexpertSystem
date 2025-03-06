@@ -107,6 +107,7 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
 
+    # === Temperature Rules ===
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
     def high_temperature(self, temp):
         time_period = self.get_time_of_day()
@@ -116,8 +117,11 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "morning":
             self.add_issue("🔥 High morning temperatures detected! Oxygen levels may drop.",
                            "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
-        else:
-            self.add_issue("🔥 High water temperature detected! Oxygen levels may drop.",
+        elif time_period == "evening":
+            self.add_issue("🔥 High evening temperatures detected! Oxygen levels may drop.",
+                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+        else:  # Nighttime
+            self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
                            "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
     # === pH Rules ===
@@ -147,6 +151,9 @@ class OxygenPredictor(KnowledgeEngine):
         time_period = self.get_time_of_day()
         if time_period == "morning":
             self.add_issue("⚠️ High salinity detected in the morning! Potential stress on freshwater fish.",
+                           "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
+        elif time_period == "afternoon":
+            self.add_issue("⚠️ High salinity detected in the afternoon! Potential stress on freshwater fish.",
                            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
         else:
             self.add_issue("⚠️ High salinity detected! Potential stress on freshwater fish.",

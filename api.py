@@ -142,7 +142,7 @@ class OxygenPredictor(KnowledgeEngine):
                            "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
     
     # === Salinity Rules ===
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 15)))
+    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 7)))
     def high_salinity(self, sal):
         time_period = self.get_time_of_day()
         if time_period == "morning":

@@ -17,6 +17,11 @@ class OxygenPredictor(KnowledgeEngine):
         super().__init__()
         self.relevant_issues = []  # Stores detected issues
         self.positive_feedback = []  # Stores positive messages
+        # Initialize these attributes with default values to prevent AttributeError
+        self.most_relevant_warnings = []
+        self.most_relevant_recommendations = ""
+        self.positive_messages = []
+        self.positive_suggestions = []
 
     def add_issue(self, warning, recommendation, severity, category):
         """Adds an issue while ensuring diversity in categories."""
@@ -37,6 +42,12 @@ class OxygenPredictor(KnowledgeEngine):
 
     def finalize_decision(self):
         """Selects two most relevant warnings and merges their recommendations into one."""
+        # Initialize lists for output
+        self.most_relevant_warnings = []
+        self.most_relevant_recommendations = ""
+        self.positive_messages = []
+        self.positive_suggestions = []
+        
         if not self.relevant_issues:
             # Only show the "all parameters are optimal" message if NO issues are detected
             self.positive_feedback.append({
@@ -187,32 +198,43 @@ def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")  # Log input data for debugging
 
-    # Check if required keys are present
-    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
-    for key in required_keys:
-        if key not in data:
-            logger.error(f"Missing key in input data: {key}")
-            return jsonify({"error": f"Missing key in input data: {key}"}), 400
+    try:
+        # Check if required keys are present
+        required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
+        for key in required_keys:
+            if key not in data:
+                logger.error(f"Missing key in input data: {key}")
+                return jsonify({"error": f"Missing required parameter: {key}"}), 400
 
-    # Check if ph_level is a valid number
-    if not isinstance(data["ph_level"], (int, float)):
-        logger.error(f"Invalid ph_level value: {data['ph_level']}")
-        return jsonify({"error": "ph_level must be a number!"}), 400
+        # Validate data types and set defaults if needed
+        try:
+            data["ph_level"] = float(data["ph_level"])
+            data["dissolved_oxygen"] = float(data["dissolved_oxygen"])
+            data["temperature"] = float(data["temperature"])
+            data["salinity"] = float(data["salinity"])
+            data["ammonia"] = float(data["ammonia"])
+        except (ValueError, TypeError):
+            logger.error(f"Invalid data type in input: {data}")
+            return jsonify({"error": "All parameters must be valid numbers"}), 400
 
-    predictor = OxygenPredictor()
-    predictor.reset()
-    predictor.declare(Fact(**data))
-    predictor.run()
-    predictor.finalize_decision()
+        predictor = OxygenPredictor()
+        predictor.reset()
+        predictor.declare(Fact(**data))
+        predictor.run()
+        predictor.finalize_decision()
 
-    result = {
-        "warnings": predictor.most_relevant_warnings,
-        "recommendations": [predictor.most_relevant_recommendations],
-        "positive_feedback": predictor.positive_messages,
-        "positive_suggestions": predictor.positive_suggestions
-    }
-    logger.debug(f"Generated result: {result}")  # Log result for debugging
-    return jsonify(result)
+        result = {
+            "warnings": predictor.most_relevant_warnings,
+            "recommendations": [predictor.most_relevant_recommendations] if predictor.most_relevant_recommendations else [],
+            "positive_feedback": predictor.positive_messages,
+            "positive_suggestions": predictor.positive_suggestions
+        }
+        logger.debug(f"Generated result: {result}")  # Log result for debugging
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Exception in predict route: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     import os

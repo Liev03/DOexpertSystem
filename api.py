@@ -136,7 +136,7 @@ class OxygenPredictor(KnowledgeEngine):
                        "Increase water temperature gradually using a heater or by reducing water flow.", severity=3, category="temperature")
 
     # === pH Rules ===
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
     def low_ph(self, ph):
         time_period = self.get_time_of_day()
         if ph < 3.0:  # Extremely low pH
@@ -146,7 +146,7 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ Low pH detected! Water is too acidic.",
                            "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.", severity=3, category="ph")
 
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8)))
     def high_ph(self, ph):
         logger.debug(f"High pH rule triggered! pH level: {ph}")  # Log when the rule is triggered
         time_period = self.get_time_of_day()

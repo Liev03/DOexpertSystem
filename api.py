@@ -12,7 +12,7 @@ CORS(app)  # Enable CORS for frontend access
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-class WaterQualityPredictor(KnowledgeEngine):
+class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
         self.relevant_issues = []  # Stores detected issues

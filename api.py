@@ -199,7 +199,7 @@ def predict():
         logger.error(f"Invalid ph_level value: {data['ph_level']}")
         return jsonify({"error": "ph_level must be a number!"}), 400
 
-    predictor = WaterQualityPredictor()
+    predictor = OxygenPredictor()
     predictor.reset()
     predictor.declare(Fact(**data))
     predictor.run()

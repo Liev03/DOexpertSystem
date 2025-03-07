@@ -12,7 +12,7 @@ CORS(app)  # Enable CORS for frontend access
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-class WaterQualityPredictor(KnowledgeEngine):
+class OxygenPredictor(KnowledgeEngine):
     def __init__(self):
         super().__init__()
         self.relevant_issues = []  # Stores detected issues
@@ -122,15 +122,15 @@ class WaterQualityPredictor(KnowledgeEngine):
                            "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
         elif time_period == "morning":
             self.add_issue("🔥 High morning temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Increase aeration and circulate water to improve oxygen levels. Monitor fish behavior for signs of stress.", severity=3, category="temperature")
         elif time_period == "evening":
             self.add_issue("🔥 High evening temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Install aerators if available or circulate water to improve oxygen levels. Prevent water from becoming stagnant and monitor fish behavior for signs of stress.", severity=3, category="temperature")
         else:  # Nighttime
             self.add_issue("🔥 High nighttime temperatures detected! Oxygen levels may drop.",
-                           "Increase aeration to improve oxygen levels. Provide shade and monitor fish behavior for signs of stress.", severity=3, category="temperature")
+                           "Install aerators if available or circulate water to improve oxygen levels. increase aeration of water and monitor fish behavior for signs of stress.", severity=3, category="temperature")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 20)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 23)))
     def low_temperature(self, temp):
         self.add_issue("⚠️ Low temperature detected! Fish may become lethargic.",
                        "Increase water temperature gradually using a heater or by reducing water flow.", severity=3, category="temperature")
@@ -199,7 +199,7 @@ def predict():
         logger.error(f"Invalid ph_level value: {data['ph_level']}")
         return jsonify({"error": "ph_level must be a number!"}), 400
 
-    predictor = WaterQualityPredictor()
+    predictor = OxygenPredictor()
     predictor.reset()
     predictor.declare(Fact(**data))
     predictor.run()

@@ -18,6 +18,8 @@ class OxygenPredictor(KnowledgeEngine):
         super().__init__()
         self.relevant_issues = []  # Stores detected issues
         self.positive_feedback = []  # Stores positive messages
+        self.most_relevant_warnings = []  # Initialize to avoid AttributeError
+        self.most_relevant_recommendations = ""  # Initialize to avoid AttributeError
 
     def add_issue(self, warning, recommendation, severity, category):
         """Adds an issue while ensuring diversity in categories."""
@@ -45,6 +47,8 @@ class OxygenPredictor(KnowledgeEngine):
                 "suggestion": "Maintain regular monitoring and continue good pond management practices.",
                 "category": "overall"
             })
+            self.most_relevant_warnings = []  # No warnings
+            self.most_relevant_recommendations = ""  # No recommendations
         else:
             # Sort issues by severity (descending)
             self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)

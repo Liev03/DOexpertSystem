@@ -21,15 +21,15 @@ class OxygenPredictor(KnowledgeEngine):
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
         self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
 
-def add_issue(self, warning, recommendation, severity, category, prediction):
-    """Adds an issue while ensuring diversity in categories."""
-    self.relevant_issues.append({
-        "warning": warning,
-        "recommendation": recommendation,
-        "severity": severity,
-        "category": category,
-        "prediction": prediction  # Add prediction field
-    })
+    def add_issue(self, warning, recommendation, severity, category, prediction):
+        """Adds an issue while ensuring diversity in categories."""
+        self.relevant_issues.append({
+            "warning": warning,
+            "recommendation": recommendation,
+            "severity": severity,
+            "category": category,
+            "prediction": prediction  # Add prediction field
+        })
     
     def add_positive_feedback(self, message, suggestion, category):
         """Adds positive feedback when water parameters are within a healthy range."""

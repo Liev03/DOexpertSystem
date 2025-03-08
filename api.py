@@ -81,7 +81,7 @@ class OxygenPredictor(KnowledgeEngine):
             return "night"
 
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 1.3)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4)))
     def critically_low_oxygen(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":

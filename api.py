@@ -19,17 +19,18 @@ class OxygenPredictor(KnowledgeEngine):
         self.relevant_issues = []  # Stores detected issues
         self.positive_feedback = []  # Stores positive messages
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
+        self.most_relevant_predictions = []
         self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
 
-    def add_issue(self, warning, recommendation, severity, category, prediction):
-        """Adds an issue while ensuring diversity in categories."""
-        self.relevant_issues.append({
-            "warning": warning,
-            "recommendation": recommendation,
-            "severity": severity,
-            "category": category,
-            "prediction": prediction  # Add prediction field
-        })
+def add_issue(self, warning, recommendation, severity, category, prediction):
+    """Adds an issue while ensuring diversity in categories."""
+    self.relevant_issues.append({
+        "warning": warning,
+        "recommendation": recommendation,
+        "severity": severity,
+        "category": category,
+        "prediction": prediction  # Add prediction field
+    })
     
     def add_positive_feedback(self, message, suggestion, category):
         """Adds positive feedback when water parameters are within a healthy range."""
@@ -49,6 +50,7 @@ class OxygenPredictor(KnowledgeEngine):
                 "category": "overall"
             })
             self.most_relevant_warnings = []  # No warnings
+            self.most_relevant_predictions = []
             self.most_relevant_recommendations = []  # No recommendations
         else:
             # Sort issues by severity (descending)
@@ -57,6 +59,7 @@ class OxygenPredictor(KnowledgeEngine):
             # Extract all warnings
             self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
 
+            self.most_relevant_predictions = [issue["prediction"] for issue in self.relevant_issues]
             # Extract all recommendations (no merging)
             self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
 

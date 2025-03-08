@@ -38,30 +38,30 @@ class OxygenPredictor(KnowledgeEngine):
             "category": category
         })
 
-    def finalize_decision(self):
-        """Includes all detected warnings and recommendations as separate lists."""
-        if not self.relevant_issues:
-            # Only show the "all parameters are optimal" message if NO issues are detected
-            self.positive_feedback.append({
-                "message": "✅ All water parameters are in optimal range!",
-                "suggestion": "Maintain regular monitoring and continue good pond management practices.",
-                "category": "overall"
-            })
-            self.most_relevant_warnings = []  # No warnings
-            self.most_relevant_recommendations = []  # No recommendations
-        else:
-            # Sort issues by severity (descending)
-            self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
+def finalize_decision(self):
+    """Includes all detected warnings and recommendations as separate lists."""
+    if not self.relevant_issues:
+        # Only show the "all parameters are optimal" message if NO issues are detected
+        self.positive_feedback.append({
+            "message": "✅ All water parameters are in optimal range!",
+            "suggestion": "Maintain regular monitoring and continue good pond management practices.",
+            "category": "overall"
+        })
+        self.most_relevant_warnings = []  # No warnings
+        self.most_relevant_recommendations = []  # No recommendations
+    else:
+        # Sort issues by severity (descending)
+        self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
 
-            # Extract all warnings
-            self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
+        # Extract all warnings
+        self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
 
-            # Extract all recommendations (no merging)
-            self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
+        # Extract all recommendations (no merging)
+        self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
 
-        # Handle positive feedback
-        self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
-        self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
+    # Handle positive feedback
+    self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
+    self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
@@ -91,11 +91,6 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
 
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x > 12.0)))
-    def high_oxygen(self, do):
-        self.add_issue("⚠️ High oxygen levels detected! Potential risk to fish.",
-                       "Reduce aeration to bring oxygen levels back to optimal range.", severity=3, category="oxygen")
-
     # === Temperature Rules ===
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
     def high_temperature(self, temp):
@@ -103,7 +98,7 @@ class OxygenPredictor(KnowledgeEngine):
         self.add_issue(f"🔥 High {time_period} temperatures detected! Oxygen levels may drop.",
                        "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 23)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 25)))
     def low_temperature(self, temp):
         self.add_issue("⚠️ Low temperature detected! Fish may become lethargic.",
                        "Increase water temperature gradually using a heater or by reducing water flow.", severity=3, category="temperature")
@@ -118,21 +113,21 @@ class OxygenPredictor(KnowledgeEngine):
             self.add_issue("⚠️ Low pH detected! Water is too acidic.",
                            "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.", severity=3, category="ph")
 
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 9)))
     def high_ph(self, ph):
         logger.debug(f"High pH rule triggered! pH level: {ph}")
         self.add_issue("⚠️ High pH detected! Water is too alkaline.",
                        "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.", severity=3, category="ph")
     
     # === Salinity Rules ===
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 7)))
+    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 0.5)))
     def high_salinity(self, sal):
         time_period = self.get_time_of_day()
         self.add_issue(f"⚠️ High salinity detected{' in the ' + time_period if time_period else ''}! Potential stress on freshwater fish.",
                        "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.", severity=3, category="salinity")
 
     # === Ammonia Rules ===
-    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
+    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.2)))
     def high_ammonia(self, amm):
         if amm > 2.0:  # Extremely high ammonia
             self.add_issue("⚠️ Extremely high ammonia levels detected! Toxic to fish.",

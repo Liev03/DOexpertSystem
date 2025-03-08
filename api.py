@@ -19,7 +19,7 @@ class OxygenPredictor(KnowledgeEngine):
         self.relevant_issues = []  # Stores detected issues
         self.positive_feedback = []  # Stores positive messages
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
-        self.most_relevant_recommendations = ""  # Initialize to avoid AttributeError
+        self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
 
     def add_issue(self, warning, recommendation, severity, category):
         """Adds an issue while ensuring diversity in categories."""
@@ -39,7 +39,7 @@ class OxygenPredictor(KnowledgeEngine):
         })
 
     def finalize_decision(self):
-        """Selects two most relevant warnings and merges their recommendations into one."""
+        """Includes all detected warnings and recommendations as separate lists."""
         if not self.relevant_issues:
             # Only show the "all parameters are optimal" message if NO issues are detected
             self.positive_feedback.append({
@@ -48,35 +48,16 @@ class OxygenPredictor(KnowledgeEngine):
                 "category": "overall"
             })
             self.most_relevant_warnings = []  # No warnings
-            self.most_relevant_recommendations = ""  # No recommendations
+            self.most_relevant_recommendations = []  # No recommendations
         else:
             # Sort issues by severity (descending)
             self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
-            selected_issues = []
-            seen_categories = set()
-            
-            for issue in self.relevant_issues:
-                if issue["category"] not in seen_categories:
-                    selected_issues.append(issue)
-                    seen_categories.add(issue["category"])
-                if len(selected_issues) == 2:
-                    break
 
-            # Extract warnings
-            self.most_relevant_warnings = [issue["warning"] for issue in selected_issues]
+            # Extract all warnings
+            self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
 
-            # Merge recommendations into a single paragraph (remove duplicates, improve flow)
-            all_recommendations = [issue["recommendation"] for issue in selected_issues]
-            unique_sentences = set()
-
-            for recommendation in all_recommendations:
-                sentences = recommendation.split(". ")
-                for sentence in sentences:
-                    if sentence.strip() and sentence not in unique_sentences:  # Avoid empty strings and duplicates
-                        unique_sentences.add(sentence.strip())
-
-            # Combine sentences into a single paragraph
-            self.most_relevant_recommendations = ". ".join(unique_sentences) + "."
+            # Extract all recommendations (no merging)
+            self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
 
         # Handle positive feedback
         self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
@@ -186,7 +167,7 @@ def predict():
 
     result = {
         "warnings": predictor.most_relevant_warnings,
-        "recommendations": [predictor.most_relevant_recommendations],
+        "recommendations": predictor.most_relevant_recommendations,
         "positive_feedback": predictor.positive_messages,
         "positive_suggestions": predictor.positive_suggestions
     }

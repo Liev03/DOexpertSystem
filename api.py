@@ -86,7 +86,7 @@ class OxygenPredictor(KnowledgeEngine):
         time_period = self.get_time_of_day()
         if time_period == "night":
             self.add_issue("⚠️ Nighttime oxygen depletion! Risk of fish suffocation.",
-                           "Increase aeration at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.", severity=4, category="oxygen")
+                           "Increase aeration and water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.", severity=4, category="oxygen")
         else:
             self.add_issue("⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
                            "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.", severity=4, category="oxygen")
@@ -95,8 +95,21 @@ class OxygenPredictor(KnowledgeEngine):
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
     def high_temperature(self, temp):
         time_period = self.get_time_of_day()
-        self.add_issue(f"🔥 High {time_period} temperatures detected! Oxygen levels may drop.",
-                       "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.", severity=3, category="temperature")
+        
+        if time_period == "morning":
+            warning = f"🔥 High morning temperatures detected! Oxygen levels may drop."
+            recommendation = "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption."
+        elif time_period == "afternoon":
+            warning = f"🔥 High afternoon temperatures detected! Oxygen levels may drop."
+            recommendation = "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption."
+        elif time_period == "evening":
+            warning = f"🔥 High evening temperatures detected! Oxygen levels may drop."
+            recommendation = "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure."
+        else:  # Nighttime
+            warning = f"🔥 High nighttime temperatures detected! Oxygen levels may drop."
+            recommendation = "Increase aeration and water circulation to cool the water. Monitor fish behavior for signs of stress."
+
+        self.add_issue(warning, recommendation, severity=3, category="temperature")
 
     @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 24)))
     def low_temperature(self, temp):

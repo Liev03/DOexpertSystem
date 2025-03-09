@@ -539,6 +539,12 @@ def predict():
             logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
             return jsonify({"error": f"{key} must be non-negative!"}), 400
 
+    # Validate fish type
+    valid_fish_types = ["catfish", "tilapia", "crayfish", "standard"]
+    if data["type"] not in valid_fish_types:
+        logger.error(f"Invalid fish type: {data['type']}")
+        return jsonify({"error": f"Invalid fish type. Must be one of: {valid_fish_types}"}), 400
+
     predictor = OxygenPredictor()
     predictor.reset()
     predictor.declare(Fact(**data))
@@ -550,7 +556,7 @@ def predict():
         "recommendations": predictor.most_relevant_recommendations,
         "positive_feedback": predictor.positive_messages,
         "positive_suggestions": predictor.positive_suggestions,
-        "predictions": predictor.predictions  # Add predictions to the response
+        "predictions": predictor.predictions
     }
     logger.debug(f"Generated result: {result}")
     return jsonify(result)

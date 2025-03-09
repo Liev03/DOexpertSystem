@@ -50,9 +50,6 @@ class OxygenPredictor(KnowledgeEngine):
                 "suggestion": "Maintain regular monitoring and continue good pond management practices.",
                 "category": "overall"
             })
-            self.most_relevant_warnings = []  # No warnings
-            self.most_relevant_recommendations = []  # No recommendations
-            self.predictions = []  # No predictions
         else:
             # Sort issues by severity (descending)
             self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
@@ -225,6 +222,58 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and reduced growth if temperatures remain high."
             )
 
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(temperature=MATCH.temp & P(lambda x: x > 27))
+    )
+    def high_temperature_standard(self, temp):
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "🔥 High morning temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="High temperatures can reduce oxygen levels, stressing fish and making them more susceptible to diseases."
+            )
+        elif time_period == "afternoon":
+            self.add_issue(
+                "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="Prolonged high temperatures can lead to fish stress, reduced appetite, and increased mortality."
+            )
+        elif time_period == "evening":
+            self.add_issue(
+                "🔥 High evening temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                severity=3,
+                category="temperature",
+                prediction="Fish may become stressed and lethargic if water temperatures remain high."
+            )
+        else:  # Nighttime
+            self.add_issue(
+                "🔥 High nighttime temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Monitor fish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Fish may experience stress and reduced oxygen levels, leading to potential fatalities."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 24))
+    )
+    def low_temperature_standard(self, temp):
+        self.add_issue(
+            "⚠️ Low temperature detected! Fish may become lethargic.",
+            "Increase water temperature gradually using a heater or by reducing water flow.",
+            severity=3,
+            category="temperature",
+            prediction="Fish may become lethargic, stop eating, and become more susceptible to diseases if temperatures remain low."
+        )
+
     # === pH Rules ===
     @Rule(
         Fact(fish_type="catfish"),
@@ -293,6 +342,41 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and reduced growth if pH remains high."
             )
 
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 5))
+    )
+    def low_ph_standard(self, ph):
+        if ph < 3.0:  # Extremely low pH
+            self.add_issue(
+                "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
+                "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
+                severity=5,
+                category="ph",
+                prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
+            )
+        else:  # Moderately low pH
+            self.add_issue(
+                "⚠️ Low pH detected! Water is too acidic.",
+                "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
+                severity=3,
+                category="ph",
+                prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5))
+    )
+    def high_ph_standard(self, ph):
+        self.add_issue(
+            "⚠️ High pH detected! Water is too alkaline.",
+            "Add driftwood or peat moss to the tank to naturally lower pH and perform a partial water change to reduce alkalinity.",
+            severity=3,
+            category="ph",
+            prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
+        )
+
     # === Ammonia Rules ===
     @Rule(
         Fact(fish_type="catfish"),
@@ -360,6 +444,28 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and molting problems if ammonia levels remain high."
             )
 
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))
+    )
+    def high_ammonia_standard(self, amm):
+        if amm > 1.5:  # Extremely high ammonia
+            self.add_issue(
+                "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
+                "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",
+                severity=5,
+                category="ammonia",
+                prediction="Fish may suffer from ammonia poisoning, leading to gill damage, lethargy, and death."
+            )
+        else:  # Moderately high ammonia
+            self.add_issue(
+                "⚠️ High ammonia levels detected! Potential stress on fish.",
+                "Perform a partial water change and increase aeration. Reduce feeding and remove any decaying organic matter.",
+                severity=4,
+                category="ammonia",
+                prediction="Fish may experience stress, reduced appetite, and increased susceptibility to diseases if ammonia levels remain high."
+            )
+
     # === Salinity Rules ===
     @Rule(
         Fact(fish_type="catfish"),
@@ -398,6 +504,20 @@ class OxygenPredictor(KnowledgeEngine):
             severity=3,
             category="salinity",
             prediction="Crayfish may experience osmotic stress, leading to dehydration and death if salinity remains high."
+        )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(salinity=MATCH.sal & P(lambda x: x > 0.3))
+    )
+    def high_salinity_standard(self, sal):
+        time_period = self.get_time_of_day()
+        self.add_issue(
+            f"⚠️ High salinity detected{' in the ' + time_period if time_period else ''}! Potential stress on freshwater fish.",
+            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            severity=3,
+            category="salinity",
+            prediction="Freshwater fish may experience osmotic stress, leading to dehydration and death if salinity remains high."
         )
 
 @app.route('/predict', methods=['POST'])

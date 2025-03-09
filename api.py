@@ -97,7 +97,7 @@ class OxygenPredictor(KnowledgeEngine):
     # === Oxygen Rules ===
     @Rule(
         Fact(fish_type="catfish"),
-        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5))  # Catfish require higher oxygen levels
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4))  # Catfish require higher oxygen levels
     )
     def critically_low_oxygen_catfish(self, do):
         self.add_issue(
@@ -110,7 +110,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="tilapia"),
-        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4))  # Tilapia can tolerate lower oxygen levels
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5))  # Tilapia can tolerate lower oxygen levels
     )
     def critically_low_oxygen_tilapia(self, do):
         self.add_issue(
@@ -123,7 +123,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="crayfish"),
-        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6))  # Crayfish require moderate oxygen levels
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5))  # Crayfish require moderate oxygen levels
     )
     def critically_low_oxygen_crayfish(self, do):
         self.add_issue(
@@ -160,10 +160,10 @@ class OxygenPredictor(KnowledgeEngine):
     # === Temperature Rules ===
     @Rule(
         Fact(fish_type="catfish"),
-        Fact(temperature=MATCH.temp & P(lambda x: x < 22 or x > 30))  # Catfish prefer 22-30°C
+        Fact(temperature=MATCH.temp & P(lambda x: x < 25 or x > 32))  # Catfish prefer 22-30°C
     )
     def temperature_catfish(self, temp):
-        if temp < 22:
+        if temp < 25:
             self.add_issue(
                 "⚠️ Low temperature for catfish! Fish may become lethargic.",
                 "Gradually increase water temperature using a heater.",
@@ -182,10 +182,10 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="tilapia"),
-        Fact(temperature=MATCH.temp & P(lambda x: x < 20 or x > 35))  # Tilapia prefer 20-35°C
+        Fact(temperature=MATCH.temp & P(lambda x: x < 26 or x > 30))  # Tilapia prefer 20-35°C
     )
     def temperature_tilapia(self, temp):
-        if temp < 20:
+        if temp < 26:
             self.add_issue(
                 "⚠️ Low temperature for tilapia! Fish may become inactive.",
                 "Gradually increase water temperature using a heater.",
@@ -204,7 +204,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="crayfish"),
-        Fact(temperature=MATCH.temp & P(lambda x: x < 18 or x > 25))  # Crayfish prefer 18-25°C
+        Fact(temperature=MATCH.temp & P(lambda x: x < 18 or x > 24))  # Crayfish prefer 18-25°C
     )
     def temperature_crayfish(self, temp):
         if temp < 18:
@@ -279,7 +279,7 @@ class OxygenPredictor(KnowledgeEngine):
     # === pH Rules ===
     @Rule(
         Fact(fish_type="catfish"),
-        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5 or x > 8.5))  # Catfish prefer pH 6.5-8.5
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5 or x > 8))  # Catfish prefer pH 6.5-8.5
     )
     def ph_catfish(self, ph):
         if ph < 6.5:
@@ -301,7 +301,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="tilapia"),
-        Fact(ph_level=MATCH.ph & P(lambda x: x < 6 or x > 9))  # Tilapia prefer pH 6-9
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5 or x > 8.5))  # Tilapia prefer pH 6-9
     )
     def ph_tilapia(self, ph):
         if ph < 6:
@@ -323,10 +323,10 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="crayfish"),
-        Fact(ph_level=MATCH.ph & P(lambda x: x < 7 or x > 8.5))  # Crayfish prefer pH 7-8.5
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5 or x > 7.5))  # Crayfish prefer pH 7-8.5
     )
     def ph_crayfish(self, ph):
-        if ph < 7:
+        if ph < 6.5:
             self.add_issue(
                 "⚠️ Low pH for crayfish! Water is too acidic.",
                 "Add baking soda to gradually raise pH.",
@@ -381,10 +381,10 @@ class OxygenPredictor(KnowledgeEngine):
     # === Ammonia Rules ===
     @Rule(
         Fact(fish_type="catfish"),
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))  # Catfish are sensitive to ammonia
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 3))  # Catfish are sensitive to ammonia
     )
     def ammonia_catfish(self, amm):
-        if amm > 1.5:
+        if amm > 4.5:
             self.add_issue(
                 "⚠️ Extremely high ammonia levels for catfish! Toxic to fish.",
                 "Immediately perform a partial water change and increase aeration.",
@@ -403,10 +403,10 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="tilapia"),
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 1.0))  # Tilapia can tolerate slightly higher ammonia levels
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 2.0))  # Tilapia can tolerate slightly higher ammonia levels
     )
     def ammonia_tilapia(self, amm):
-        if amm > 2.0:
+        if amm > 3.0:
             self.add_issue(
                 "⚠️ Extremely high ammonia levels for tilapia! Toxic to fish.",
                 "Immediately perform a partial water change and increase aeration.",
@@ -425,10 +425,10 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="crayfish"),
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))  # Crayfish are sensitive to ammonia
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 1.0))  # Crayfish are sensitive to ammonia
     )
     def ammonia_crayfish(self, amm):
-        if amm > 1.5:
+        if amm > 2.0:
             self.add_issue(
                 "⚠️ Extremely high ammonia levels for crayfish! Toxic to crayfish.",
                 "Immediately perform a partial water change and increase aeration.",
@@ -470,7 +470,7 @@ class OxygenPredictor(KnowledgeEngine):
     # === Salinity Rules ===
     @Rule(
         Fact(fish_type="catfish"),
-        Fact(salinity=MATCH.sal & P(lambda x: x > 0.1))  # Catfish prefer low salinity
+        Fact(salinity=MATCH.sal & P(lambda x: x > 5))  # Catfish prefer low salinity
     )
     def salinity_catfish(self, sal):
         self.add_issue(
@@ -483,7 +483,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="tilapia"),
-        Fact(salinity=MATCH.sal & P(lambda x: x > 0.3))  # Tilapia can tolerate moderate salinity
+        Fact(salinity=MATCH.sal & P(lambda x: x > 5))  # Tilapia can tolerate moderate salinity
     )
     def salinity_tilapia(self, sal):
         self.add_issue(
@@ -496,7 +496,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(fish_type="crayfish"),
-        Fact(salinity=MATCH.sal & P(lambda x: x > 0.2))  # Crayfish prefer low salinity
+        Fact(salinity=MATCH.sal & P(lambda x: x > 1.0))  # Crayfish prefer low salinity
     )
     def salinity_crayfish(self, sal):
         self.add_issue(

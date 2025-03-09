@@ -155,7 +155,7 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === pH Rules ===
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 7.5)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
     def low_ph(self, ph):
         if ph < 3.0:  # Extremely low pH
             self.add_issue(
@@ -199,7 +199,7 @@ class OxygenPredictor(KnowledgeEngine):
     # === Ammonia Rules ===
     @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
     def high_ammonia(self, amm):
-        if amm > 2.0:  # Extremely high ammonia
+        if amm > 1.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
                 "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",

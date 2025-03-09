@@ -93,7 +93,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion! Risk of fish suffocation.",
-                "Increase aeration and water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may suffocate and die if oxygen levels remain critically low."
@@ -101,7 +101,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
-                "Immediately activate all aerators and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."

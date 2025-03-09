@@ -155,35 +155,36 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === pH Rules ===
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
-    def low_ph(self, ph):
-        if ph < 3.0:  # Extremely low pH
-            self.add_issue(
-                "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
-                "Immediately add agricultural lime or baking soda to raise pH. Perform a partial water change to dilute acidity.",
-                severity=5,
-                category="ph",
-                prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
-            )
-        else:  # Moderately low pH
-            self.add_issue(
-                "⚠️ Low pH detected! Water is too acidic.",
-                "Add agricultural lime or baking soda to gradually raise pH. Avoid sudden changes, as they can stress fish.",
-                severity=3,
-                category="ph",
-                prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
-            )
-
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
-    def high_ph(self, ph):
+# === pH Rules ===
+@Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
+def low_ph(self, ph):
+    if ph < 3.0:  # Extremely low pH
         self.add_issue(
-            "⚠️ High pH detected! Water is too alkaline.",
-            "Introduce peat moss or use pH stabilizers to lower alkalinity. Monitor pH daily to ensure gradual adjustment.",
+            "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
+            "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
+            severity=5,
+            category="ph",
+            prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
+        )
+    else:  # Moderately low pH
+        self.add_issue(
+            "⚠️ Low pH detected! Water is too acidic.",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
             severity=3,
             category="ph",
-            prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
+            prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
         )
 
+@Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
+def high_ph(self, ph):
+    self.add_issue(
+        "⚠️ High pH detected! Water is too alkaline.",
+        "Add driftwood or peat moss to the tank to naturally lower pH and perform a partial water change to reduce alkalinity.",
+        severity=3,
+        category="ph",
+        prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
+    )
+    
     # === Salinity Rules ===
     @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)))
     def high_salinity(self, sal):

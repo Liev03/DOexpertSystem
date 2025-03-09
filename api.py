@@ -20,7 +20,8 @@ class OxygenPredictor(KnowledgeEngine):
         self.positive_feedback = []  # Stores positive messages
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
         self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
-        self.predictions = []  # New: Store predictions for each issue
+        self.predictions = []  # Store predictions for each issue
+        self.fish_type = "standard"  # Default fish type
 
     def add_issue(self, warning, recommendation, severity, category, prediction):
         """Adds an issue while ensuring diversity in categories."""
@@ -86,9 +87,58 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             return "night"
 
+    # === Fish Type Rule ===
+    @Rule(Fact(type=MATCH.type))
+    def set_fish_type(self, type):
+        """Set the fish type and adjust rules accordingly."""
+        self.fish_type = type
+        logger.debug(f"Fish type set to: {type}")
+
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6)))
-    def critically_low_oxygen(self, do):
+    @Rule(
+        Fact(fish_type="catfish"),
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5))  # Catfish require higher oxygen levels
+    )
+    def critically_low_oxygen_catfish(self, do):
+        self.add_issue(
+            "⚠️ Critically low oxygen levels for catfish! Risk of suffocation.",
+            "Increase aeration immediately and reduce stocking density.",
+            severity=5,
+            category="oxygen",
+            prediction="Catfish may suffocate and die if oxygen levels remain critically low."
+        )
+
+    @Rule(
+        Fact(fish_type="tilapia"),
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4))  # Tilapia can tolerate lower oxygen levels
+    )
+    def critically_low_oxygen_tilapia(self, do):
+        self.add_issue(
+            "⚠️ Low oxygen levels for tilapia! Fish may become stressed.",
+            "Increase aeration and reduce feeding to minimize oxygen consumption.",
+            severity=4,
+            category="oxygen",
+            prediction="Tilapia may become lethargic and stop eating if oxygen levels remain low."
+        )
+
+    @Rule(
+        Fact(fish_type="crayfish"),
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6))  # Crayfish require moderate oxygen levels
+    )
+    def critically_low_oxygen_crayfish(self, do):
+        self.add_issue(
+            "⚠️ Low oxygen levels for crayfish! Risk of molting issues.",
+            "Increase aeration and ensure proper water circulation.",
+            severity=4,
+            category="oxygen",
+            prediction="Crayfish may experience molting problems and stress if oxygen levels remain low."
+        )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6))  # Standard oxygen rule
+    )
+    def critically_low_oxygen_standard(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":
             self.add_issue(
@@ -108,8 +158,77 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     # === Temperature Rules ===
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 27)))
-    def high_temperature(self, temp):
+    @Rule(
+        Fact(fish_type="catfish"),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 22 or x > 30))  # Catfish prefer 22-30°C
+    )
+    def temperature_catfish(self, temp):
+        if temp < 22:
+            self.add_issue(
+                "⚠️ Low temperature for catfish! Fish may become lethargic.",
+                "Gradually increase water temperature using a heater.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may stop eating and become susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High temperature for catfish! Risk of stress and disease.",
+                "Provide shade and increase water circulation to cool the water.",
+                severity=4,
+                category="temperature",
+                prediction="Catfish may experience stress and reduced growth if temperatures remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="tilapia"),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 20 or x > 35))  # Tilapia prefer 20-35°C
+    )
+    def temperature_tilapia(self, temp):
+        if temp < 20:
+            self.add_issue(
+                "⚠️ Low temperature for tilapia! Fish may become inactive.",
+                "Gradually increase water temperature using a heater.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may stop eating and become susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High temperature for tilapia! Risk of stress and disease.",
+                "Provide shade and increase water circulation to cool the water.",
+                severity=4,
+                category="temperature",
+                prediction="Tilapia may experience stress and reduced growth if temperatures remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="crayfish"),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 18 or x > 25))  # Crayfish prefer 18-25°C
+    )
+    def temperature_crayfish(self, temp):
+        if temp < 18:
+            self.add_issue(
+                "⚠️ Low temperature for crayfish! Molting may be affected.",
+                "Gradually increase water temperature using a heater.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may experience molting issues and stress if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High temperature for crayfish! Risk of stress and disease.",
+                "Provide shade and increase water circulation to cool the water.",
+                severity=4,
+                category="temperature",
+                prediction="Crayfish may experience stress and reduced growth if temperatures remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(temperature=MATCH.temp & P(lambda x: x > 27))
+    )
+    def high_temperature_standard(self, temp):
         time_period = self.get_time_of_day()
         if time_period == "morning":
             self.add_issue(
@@ -144,8 +263,11 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Fish may experience stress and reduced oxygen levels, leading to potential fatalities."
             )
 
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x < 24)))
-    def low_temperature(self, temp):
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 24))
+    )
+    def low_temperature_standard(self, temp):
         self.add_issue(
             "⚠️ Low temperature detected! Fish may become lethargic.",
             "Increase water temperature gradually using a heater or by reducing water flow.",
@@ -155,51 +277,179 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === pH Rules ===
-# === pH Rules ===
-@Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
-def low_ph(self, ph):
-    if ph < 3.0:  # Extremely low pH
-        self.add_issue(
-            "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
-            "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
-            severity=5,
-            category="ph",
-            prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
-        )
-    else:  # Moderately low pH
-        self.add_issue(
-            "⚠️ Low pH detected! Water is too acidic.",
-            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
-            severity=3,
-            category="ph",
-            prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
-        )
-
-@Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
-def high_ph(self, ph):
-    self.add_issue(
-        "⚠️ High pH detected! Water is too alkaline.",
-        "Add driftwood or peat moss to the tank to naturally lower pH and perform a partial water change to reduce alkalinity.",
-        severity=3,
-        category="ph",
-        prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
+    @Rule(
+        Fact(fish_type="catfish"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5 or x > 8.5))  # Catfish prefer pH 6.5-8.5
     )
-    
-    # === Salinity Rules ===
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)))
-    def high_salinity(self, sal):
-        time_period = self.get_time_of_day()
+    def ph_catfish(self, ph):
+        if ph < 6.5:
+            self.add_issue(
+                "⚠️ Low pH for catfish! Water is too acidic.",
+                "Add baking soda to gradually raise pH.",
+                severity=3,
+                category="ph",
+                prediction="Catfish may become stressed and stop eating if pH remains low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High pH for catfish! Water is too alkaline.",
+                "Add peat moss to gradually lower pH.",
+                severity=3,
+                category="ph",
+                prediction="Catfish may experience stress and reduced growth if pH remains high."
+            )
+
+    @Rule(
+        Fact(fish_type="tilapia"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6 or x > 9))  # Tilapia prefer pH 6-9
+    )
+    def ph_tilapia(self, ph):
+        if ph < 6:
+            self.add_issue(
+                "⚠️ Low pH for tilapia! Water is too acidic.",
+                "Add baking soda to gradually raise pH.",
+                severity=3,
+                category="ph",
+                prediction="Tilapia may become stressed and stop eating if pH remains low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High pH for tilapia! Water is too alkaline.",
+                "Add peat moss to gradually lower pH.",
+                severity=3,
+                category="ph",
+                prediction="Tilapia may experience stress and reduced growth if pH remains high."
+            )
+
+    @Rule(
+        Fact(fish_type="crayfish"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 7 or x > 8.5))  # Crayfish prefer pH 7-8.5
+    )
+    def ph_crayfish(self, ph):
+        if ph < 7:
+            self.add_issue(
+                "⚠️ Low pH for crayfish! Water is too acidic.",
+                "Add baking soda to gradually raise pH.",
+                severity=3,
+                category="ph",
+                prediction="Crayfish may experience molting issues and stress if pH remains low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High pH for crayfish! Water is too alkaline.",
+                "Add peat moss to gradually lower pH.",
+                severity=3,
+                category="ph",
+                prediction="Crayfish may experience stress and reduced growth if pH remains high."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 5))
+    )
+    def low_ph_standard(self, ph):
+        if ph < 3.0:  # Extremely low pH
+            self.add_issue(
+                "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
+                "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
+                severity=5,
+                category="ph",
+                prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
+            )
+        else:  # Moderately low pH
+            self.add_issue(
+                "⚠️ Low pH detected! Water is too acidic.",
+                "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
+                severity=3,
+                category="ph",
+                prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5))
+    )
+    def high_ph_standard(self, ph):
         self.add_issue(
-            f"⚠️ High salinity detected{' in the ' + time_period if time_period else ''}! Potential stress on freshwater fish.",
-            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            "⚠️ High pH detected! Water is too alkaline.",
+            "Add driftwood or peat moss to the tank to naturally lower pH and perform a partial water change to reduce alkalinity.",
             severity=3,
-            category="salinity",
-            prediction="Freshwater fish may experience osmotic stress, leading to dehydration and death if salinity remains high."
+            category="ph",
+            prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
         )
 
     # === Ammonia Rules ===
-    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
-    def high_ammonia(self, amm):
+    @Rule(
+        Fact(fish_type="catfish"),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))  # Catfish are sensitive to ammonia
+    )
+    def ammonia_catfish(self, amm):
+        if amm > 1.5:
+            self.add_issue(
+                "⚠️ Extremely high ammonia levels for catfish! Toxic to fish.",
+                "Immediately perform a partial water change and increase aeration.",
+                severity=5,
+                category="ammonia",
+                prediction="Catfish may suffer from ammonia poisoning, leading to gill damage and death."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High ammonia levels for catfish! Potential stress on fish.",
+                "Perform a partial water change and reduce feeding to minimize ammonia production.",
+                severity=4,
+                category="ammonia",
+                prediction="Catfish may experience stress and reduced appetite if ammonia levels remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="tilapia"),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 1.0))  # Tilapia can tolerate slightly higher ammonia levels
+    )
+    def ammonia_tilapia(self, amm):
+        if amm > 2.0:
+            self.add_issue(
+                "⚠️ Extremely high ammonia levels for tilapia! Toxic to fish.",
+                "Immediately perform a partial water change and increase aeration.",
+                severity=5,
+                category="ammonia",
+                prediction="Tilapia may suffer from ammonia poisoning, leading to gill damage and death."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High ammonia levels for tilapia! Potential stress on fish.",
+                "Perform a partial water change and reduce feeding to minimize ammonia production.",
+                severity=4,
+                category="ammonia",
+                prediction="Tilapia may experience stress and reduced appetite if ammonia levels remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="crayfish"),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))  # Crayfish are sensitive to ammonia
+    )
+    def ammonia_crayfish(self, amm):
+        if amm > 1.5:
+            self.add_issue(
+                "⚠️ Extremely high ammonia levels for crayfish! Toxic to crayfish.",
+                "Immediately perform a partial water change and increase aeration.",
+                severity=5,
+                category="ammonia",
+                prediction="Crayfish may suffer from ammonia poisoning, leading to molting issues and death."
+            )
+        else:
+            self.add_issue(
+                "⚠️ High ammonia levels for crayfish! Potential stress on crayfish.",
+                "Perform a partial water change and reduce feeding to minimize ammonia production.",
+                severity=4,
+                category="ammonia",
+                prediction="Crayfish may experience stress and molting problems if ammonia levels remain high."
+            )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5))
+    )
+    def high_ammonia_standard(self, amm):
         if amm > 1.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
@@ -217,21 +467,75 @@ def high_ph(self, ph):
                 prediction="Fish may experience stress, reduced appetite, and increased susceptibility to diseases if ammonia levels remain high."
             )
 
+    # === Salinity Rules ===
+    @Rule(
+        Fact(fish_type="catfish"),
+        Fact(salinity=MATCH.sal & P(lambda x: x > 0.1))  # Catfish prefer low salinity
+    )
+    def salinity_catfish(self, sal):
+        self.add_issue(
+            "⚠️ High salinity for catfish! Potential stress on fish.",
+            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            severity=3,
+            category="salinity",
+            prediction="Catfish may experience osmotic stress, leading to dehydration and death if salinity remains high."
+        )
+
+    @Rule(
+        Fact(fish_type="tilapia"),
+        Fact(salinity=MATCH.sal & P(lambda x: x > 0.3))  # Tilapia can tolerate moderate salinity
+    )
+    def salinity_tilapia(self, sal):
+        self.add_issue(
+            "⚠️ High salinity for tilapia! Potential stress on fish.",
+            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            severity=3,
+            category="salinity",
+            prediction="Tilapia may experience osmotic stress, leading to dehydration and death if salinity remains high."
+        )
+
+    @Rule(
+        Fact(fish_type="crayfish"),
+        Fact(salinity=MATCH.sal & P(lambda x: x > 0.2))  # Crayfish prefer low salinity
+    )
+    def salinity_crayfish(self, sal):
+        self.add_issue(
+            "⚠️ High salinity for crayfish! Potential stress on crayfish.",
+            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            severity=3,
+            category="salinity",
+            prediction="Crayfish may experience osmotic stress, leading to dehydration and death if salinity remains high."
+        )
+
+    @Rule(
+        Fact(fish_type="standard"),
+        Fact(salinity=MATCH.sal & P(lambda x: x > 0.3))
+    )
+    def high_salinity_standard(self, sal):
+        time_period = self.get_time_of_day()
+        self.add_issue(
+            f"⚠️ High salinity detected{' in the ' + time_period if time_period else ''}! Potential stress on freshwater fish.",
+            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+            severity=3,
+            category="salinity",
+            prediction="Freshwater fish may experience osmotic stress, leading to dehydration and death if salinity remains high."
+        )
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")
 
     # Check if required keys are present
-    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
+    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia", "type"]
     for key in required_keys:
         if key not in data:
             logger.error(f"Missing key in input data: {key}")
             return jsonify({"error": f"Missing key in input data: {key}"}), 400
-        if not isinstance(data[key], (int, float)):
+        if key != "type" and not isinstance(data[key], (int, float)):
             logger.error(f"Invalid {key} value: {data[key]}")
             return jsonify({"error": f"{key} must be a number!"}), 400
-        if data[key] < 0:  # Check for negative values
+        if key != "type" and data[key] < 0:  # Check for negative values
             logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
             return jsonify({"error": f"{key} must be non-negative!"}), 400
 

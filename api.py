@@ -21,7 +21,7 @@ class OxygenPredictor(KnowledgeEngine):
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
         self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
         self.predictions = []  # Store predictions for each issue
-        self.fish_type = "standard"  # Default fish type
+        self.fish_type = []  # Default fish type
 
     def add_issue(self, warning, recommendation, severity, category, prediction):
         """Adds an issue while ensuring diversity in categories."""

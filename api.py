@@ -87,7 +87,7 @@ class OxygenPredictor(KnowledgeEngine):
             return "night"
 
     # === Oxygen Rules ===
-    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4)))
+    @Rule(Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6)))
     def critically_low_oxygen(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":
@@ -108,7 +108,7 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     # === Temperature Rules ===
-    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 33)))
+    @Rule(Fact(temperature=MATCH.temp & P(lambda x: x > 27)))
     def high_temperature(self, temp):
         time_period = self.get_time_of_day()
         if time_period == "morning":
@@ -155,7 +155,7 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === pH Rules ===
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 5)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x < 7.5)))
     def low_ph(self, ph):
         if ph < 3.0:  # Extremely low pH
             self.add_issue(
@@ -174,7 +174,7 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
             )
 
-    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 9)))
+    @Rule(Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)))
     def high_ph(self, ph):
         self.add_issue(
             "⚠️ High pH detected! Water is too alkaline.",
@@ -185,7 +185,7 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === Salinity Rules ===
-    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 0.5)))
+    @Rule(Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)))
     def high_salinity(self, sal):
         time_period = self.get_time_of_day()
         self.add_issue(
@@ -197,7 +197,7 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === Ammonia Rules ===
-    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.2)))
+    @Rule(Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)))
     def high_ammonia(self, amm):
         if amm > 2.0:  # Extremely high ammonia
             self.add_issue(

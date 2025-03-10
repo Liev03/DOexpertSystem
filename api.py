@@ -558,11 +558,11 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 3)),
         Fact(fish_type="catfish")
     )
     def high_ammonia_catfish(self, amm):
-        if amm > 1.5:  # Extremely high ammonia
+        if amm > 4.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to catfish.",
                 "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",
@@ -580,11 +580,11 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 2)),
         Fact(fish_type="tilapia")
     )
     def high_ammonia_tilapia(self, amm):
-        if amm > 1.5:  # Extremely high ammonia
+        if amm > 3.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to tilapia.",
                 "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",
@@ -602,11 +602,11 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 1)),
         Fact(fish_type="crayfish")
     )
     def high_ammonia_crayfish(self, amm):
-        if amm > 1.5:  # Extremely high ammonia
+        if amm > 2.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to crayfish.",
                 "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",

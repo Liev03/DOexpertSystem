@@ -110,7 +110,7 @@ class OxygenPredictor(KnowledgeEngine):
         """Set fish type to crayfish."""
         self.fish_type = "crayfish"
 
-    # === Oxygen Rules ===
+    # === Oxygen Rules for Standard Fish ===
     @Rule(
         Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6)),
         Fact(fish_type="standard")
@@ -119,7 +119,7 @@ class OxygenPredictor(KnowledgeEngine):
         time_period = self.get_time_of_day()
         if time_period == "night":
             self.add_issue(
-                "⚠️ Nighttime oxygen depletion! Risk of fish suffocation.",
+                "⚠️ Nighttime oxygen depletion!",
                 "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
@@ -134,46 +134,79 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Fish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
             )
 
+    # === Oxygen Rules for Catfish ===
     @Rule(
         Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4)),
         Fact(fish_type="catfish")
     )
     def critically_low_oxygen_catfish(self, do):
-        self.add_issue(
-            "⚠️ Low oxygen levels detected! Catfish prefer oxygen levels above 4 ppm.",
-            "Increase aeration and water circulation to improve oxygen levels.",
-            severity=4,
-            category="oxygen",
-            prediction="Fish may become lethargic and stop eating if oxygen levels remain low."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "night":
+            self.add_issue(
+                "⚠️ Nighttime oxygen depletion!",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                severity=4,
+                category="oxygen",
+                prediction="Catfish may suffocate and die if oxygen levels remain critically low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ Critically low oxygen levels! Catfish may be lethargic or surfacing.",
+                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                severity=4,
+                category="oxygen",
+                prediction="Catfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
+            )
 
+    # === Oxygen Rules for Tilapia ===
     @Rule(
         Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5)),
         Fact(fish_type="tilapia")
     )
     def critically_low_oxygen_tilapia(self, do):
-        self.add_issue(
-            "⚠️ Low oxygen levels detected! Tilapia prefer oxygen levels above 5 ppm.",
-            "Increase aeration and water circulation to improve oxygen levels.",
-            severity=4,
-            category="oxygen",
-            prediction="Fish may become lethargic and stop eating if oxygen levels remain low."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "night":
+            self.add_issue(
+                "⚠️ Nighttime oxygen depletion!",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                severity=4,
+                category="oxygen",
+                prediction="Tilapia may suffocate and die if oxygen levels remain critically low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ Critically low oxygen levels! Tilapia may be lethargic or surfacing.",
+                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                severity=4,
+                category="oxygen",
+                prediction="Tilapia may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
+            )
 
+    # === Oxygen Rules for Crayfish ===
     @Rule(
         Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 5)),
         Fact(fish_type="crayfish")
     )
     def critically_low_oxygen_crayfish(self, do):
-        self.add_issue(
-            "⚠️ Low oxygen levels detected! Crayfish prefer oxygen levels above 5 ppm.",
-            "Increase aeration and water circulation to improve oxygen levels.",
-            severity=4,
-            category="oxygen",
-            prediction="Fish may become lethargic and stop eating if oxygen levels remain low."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "night":
+            self.add_issue(
+                "⚠️ Nighttime oxygen depletion!",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                severity=4,
+                category="oxygen",
+                prediction="Crayfish may suffocate and die if oxygen levels remain critically low."
+            )
+        else:
+            self.add_issue(
+                "⚠️ Critically low oxygen levels! Crayfish may be lethargic or surfacing.",
+                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                severity=4,
+                category="oxygen",
+                prediction="Crayfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
+            )
 
-    # === Temperature Rules ===
+    # === Temperature Rules for Standard Fish ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x > 27)),
         Fact(fish_type="standard")
@@ -213,44 +246,125 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Fish may experience stress and reduced oxygen levels, leading to potential fatalities."
             )
 
+    # === Temperature Rules for Catfish ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x > 32)),
         Fact(fish_type="catfish")
     )
     def high_temperature_catfish(self, temp):
-        self.add_issue(
-            "⚠️ High temperature detected! Catfish prefer temperatures between 25°C and 32°C.",
-            "Provide shade and increase water circulation to cool the water.",
-            severity=3,
-            category="temperature",
-            prediction="Fish may experience stress and reduced oxygen levels if temperatures remain high."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "🔥 High morning temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="High temperatures can reduce oxygen levels, stressing catfish and making them more susceptible to diseases."
+            )
+        elif time_period == "afternoon":
+            self.add_issue(
+                "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="Prolonged high temperatures can lead to catfish stress, reduced appetite, and increased mortality."
+            )
+        elif time_period == "evening":
+            self.add_issue(
+                "🔥 High evening temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may become stressed and lethargic if water temperatures remain high."
+            )
+        else:  # Nighttime
+            self.add_issue(
+                "🔥 High nighttime temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Monitor catfish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may experience stress and reduced oxygen levels, leading to potential fatalities."
+            )
 
+    # === Temperature Rules for Tilapia ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x > 30)),
         Fact(fish_type="tilapia")
     )
     def high_temperature_tilapia(self, temp):
-        self.add_issue(
-            "⚠️ High temperature detected! Tilapia prefer temperatures between 26°C and 30°C.",
-            "Provide shade and increase water circulation to cool the water.",
-            severity=3,
-            category="temperature",
-            prediction="Fish may experience stress and reduced oxygen levels if temperatures remain high."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "🔥 High morning temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="High temperatures can reduce oxygen levels, stressing tilapia and making them more susceptible to diseases."
+            )
+        elif time_period == "afternoon":
+            self.add_issue(
+                "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="Prolonged high temperatures can lead to tilapia stress, reduced appetite, and increased mortality."
+            )
+        elif time_period == "evening":
+            self.add_issue(
+                "🔥 High evening temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may become stressed and lethargic if water temperatures remain high."
+            )
+        else:  # Nighttime
+            self.add_issue(
+                "🔥 High nighttime temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Monitor tilapia behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may experience stress and reduced oxygen levels, leading to potential fatalities."
+            )
 
+    # === Temperature Rules for Crayfish ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x > 24)),
         Fact(fish_type="crayfish")
     )
     def high_temperature_crayfish(self, temp):
-        self.add_issue(
-            "⚠️ High temperature detected! Crayfish prefer temperatures between 18°C and 24°C.",
-            "Provide shade and increase water circulation to cool the water.",
-            severity=3,
-            category="temperature",
-            prediction="Fish may experience stress and reduced oxygen levels if temperatures remain high."
-        )
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "🔥 High morning temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="High temperatures can reduce oxygen levels, stressing crayfish and making them more susceptible to diseases."
+            )
+        elif time_period == "afternoon":
+            self.add_issue(
+                "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                severity=3,
+                category="temperature",
+                prediction="Prolonged high temperatures can lead to crayfish stress, reduced appetite, and increased mortality."
+            )
+        elif time_period == "evening":
+            self.add_issue(
+                "🔥 High evening temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may become stressed and lethargic if water temperatures remain high."
+            )
+        else:  # Nighttime
+            self.add_issue(
+                "🔥 High nighttime temperatures detected! Oxygen levels may drop.",
+                "Increase aeration and water circulation to cool the water. Monitor crayfish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may experience stress and reduced oxygen levels, leading to potential fatalities."
+            )
 
     # === pH Rules ===
     @Rule(
@@ -285,7 +399,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
-            prediction="Fish may become stressed and stop eating if pH is not corrected."
+            prediction="Catfish may become stressed and stop eating if pH is not corrected."
         )
 
     @Rule(
@@ -298,7 +412,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
-            prediction="Fish may become stressed and stop eating if pH is not corrected."
+            prediction="Tilapia may become stressed and stop eating if pH is not corrected."
         )
 
     @Rule(
@@ -311,7 +425,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
-            prediction="Fish may become stressed and stop eating if pH is not corrected."
+            prediction="Crayfish may become stressed and stop eating if pH is not corrected."
         )
 
     @Rule(
@@ -337,7 +451,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
-            prediction="Fish may experience stress and reduced growth if pH remains high."
+            prediction="Catfish may experience stress and reduced growth if pH remains high."
         )
 
     @Rule(
@@ -350,7 +464,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
-            prediction="Fish may experience stress and reduced growth if pH remains high."
+            prediction="Tilapia may experience stress and reduced growth if pH remains high."
         )
 
     @Rule(
@@ -363,7 +477,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
-            prediction="Fish may experience stress and reduced growth if pH remains high."
+            prediction="Crayfish may experience stress and reduced growth if pH remains high."
         )
 
     # === Salinity Rules ===
@@ -391,7 +505,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",
-            prediction="Fish may experience osmotic stress if salinity remains high."
+            prediction="Catfish may experience osmotic stress if salinity remains high."
         )
 
     @Rule(
@@ -404,7 +518,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",
-            prediction="Fish may experience osmotic stress if salinity remains high."
+            prediction="Tilapia may experience osmotic stress if salinity remains high."
         )
 
     @Rule(
@@ -417,7 +531,7 @@ class OxygenPredictor(KnowledgeEngine):
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",
-            prediction="Fish may experience osmotic stress if salinity remains high."
+            prediction="Crayfish may experience osmotic stress if salinity remains high."
         )
 
     # === Ammonia Rules ===

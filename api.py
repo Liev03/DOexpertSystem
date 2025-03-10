@@ -25,13 +25,15 @@ class OxygenPredictor(KnowledgeEngine):
 
     def add_issue(self, warning, recommendation, severity, category, prediction):
         """Adds an issue while ensuring diversity in categories."""
-        self.relevant_issues.append({
-            "warning": warning,
-            "recommendation": recommendation,
-            "severity": severity,
-            "category": category,
-            "prediction": prediction  # Add prediction to the issue
-        })
+        # Check if the issue already exists to avoid duplicates
+        if not any(issue["warning"] == warning for issue in self.relevant_issues):
+            self.relevant_issues.append({
+                "warning": warning,
+                "recommendation": recommendation,
+                "severity": severity,
+                "category": category,
+                "prediction": prediction  # Add prediction to the issue
+            })
 
     def add_positive_feedback(self, message, suggestion, category):
         """Adds positive feedback when water parameters are within a healthy range."""
@@ -424,99 +426,4 @@ class OxygenPredictor(KnowledgeEngine):
         Fact(fish_type="standard")
     )
     def high_ammonia_standard(self, amm):
-        if amm > 1.5:  # Extremely high ammonia
-            self.add_issue(
-                "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
-                "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",
-                severity=5,
-                category="ammonia",
-                prediction="Fish may suffer from ammonia poisoning, leading to gill damage, lethargy, and death."
-            )
-        else:  # Moderately high ammonia
-            self.add_issue(
-                "⚠️ High ammonia levels detected! Potential stress on fish.",
-                "Perform a partial water change and increase aeration. Reduce feeding and remove any decaying organic matter.",
-                severity=4,
-                category="ammonia",
-                prediction="Fish may experience stress, reduced appetite, and increased susceptibility to diseases if ammonia levels remain high."
-            )
-
-    @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 3)),
-        Fact(fish_type="catfish")
-    )
-    def high_ammonia_catfish(self, amm):
-        self.add_issue(
-            "⚠️ High ammonia levels detected! Catfish prefer ammonia levels below 3 ppm.",
-            "Perform a partial water change and increase aeration to reduce ammonia levels.",
-            severity=4,
-            category="ammonia",
-            prediction="Fish may suffer from ammonia poisoning if levels remain high."
-        )
-
-    @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 2)),
-        Fact(fish_type="tilapia")
-    )
-    def high_ammonia_tilapia(self, amm):
-        self.add_issue(
-            "⚠️ High ammonia levels detected! Tilapia prefer ammonia levels below 2 ppm.",
-            "Perform a partial water change and increase aeration to reduce ammonia levels.",
-            severity=4,
-            category="ammonia",
-            prediction="Fish may suffer from ammonia poisoning if levels remain high."
-        )
-
-    @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 1)),
-        Fact(fish_type="crayfish")
-    )
-    def high_ammonia_crayfish(self, amm):
-        self.add_issue(
-            "⚠️ High ammonia levels detected! Crayfish prefer ammonia levels below 1 ppm.",
-            "Perform a partial water change and increase aeration to reduce ammonia levels.",
-            severity=4,
-            category="ammonia",
-            prediction="Fish may suffer from ammonia poisoning if levels remain high."
-        )
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    data = request.json
-    logger.debug(f"Received input data: {data}")
-
-    # Check if required keys are present
-    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
-    for key in required_keys:
-        if key not in data:
-            logger.error(f"Missing key in input data: {key}")
-            return jsonify({"error": f"Missing key in input data: {key}"}), 400
-        if not isinstance(data[key], (int, float)):
-            logger.error(f"Invalid {key} value: {data[key]}")
-            return jsonify({"error": f"{key} must be a number!"}), 400
-        if data[key] < 0:  # Check for negative values
-            logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
-            return jsonify({"error": f"{key} must be non-negative!"}), 400
-
-    fish_type = data.get('fish_type', 'standard')  # Default to "standard" if not specified
-
-    predictor = OxygenPredictor()
-    predictor.reset()
-    predictor.declare(Fact(**data))
-    predictor.declare(Fact(fish_type=fish_type))  # Declare fish_type as a fact
-    predictor.run()
-    predictor.finalize_decision()
-
-    result = {
-        "warnings": predictor.most_relevant_warnings,
-        "recommendations": predictor.most_relevant_recommendations,
-        "positive_feedback": predictor.positive_messages,
-        "positive_suggestions": predictor.positive_suggestions,
-        "predictions": predictor.predictions  # Add predictions to the response
-    }
-    logger.debug(f"Generated result: {result}")
-    return jsonify(result)
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+        if am

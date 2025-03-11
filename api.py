@@ -107,7 +107,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Oxygen Rules for others Fish ===
     @Rule(
-        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6)),
+        Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 4)),
         Fact(fish_type="others")
     )
     def critically_low_oxygen_others(self, do):
@@ -203,7 +203,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Temperature Rules for others Fish ===
     @Rule(
-        Fact(temperature=MATCH.temp & P(lambda x: x > 27)),
+        Fact(temperature=MATCH.temp & P(lambda x: x > 30)),
         Fact(fish_type="others")
     )
     def high_temperature_others(self, temp):
@@ -363,11 +363,11 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === pH Rules ===
     @Rule(
-        Fact(ph_level=MATCH.ph & P(lambda x: x < 5)),
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6)),
         Fact(fish_type="others")
     )
     def low_ph_others(self, ph):
-        if ph < 3.0:  # Extremely low pH
+        if ph < 4.0:  # Extremely low pH
             self.add_issue(
                 "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
                 "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
@@ -425,7 +425,7 @@ class OxygenPredictor(KnowledgeEngine):
 
         # === Low Temperature Rules for others Fish ===
     @Rule(
-        Fact(temperature=MATCH.temp & P(lambda x: x < 24)),
+        Fact(temperature=MATCH.temp & P(lambda x: x < 20)),
         Fact(fish_type="others")
     )
     def low_temperature_others(self, temp):
@@ -552,7 +552,7 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     @Rule(
-        Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)),
+        Fact(ph_level=MATCH.ph & P(lambda x: x > 8.0)),
         Fact(fish_type="others")
     )
     def high_ph_others(self, ph):
@@ -605,7 +605,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Salinity Rules ===
 @Rule(
-    Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)),
+    Fact(salinity=MATCH.sal & P(lambda x: x > 5.0)),
     Fact(fish_type="others")
 )
 def high_salinity_others(self, sal):
@@ -682,11 +682,11 @@ def high_salinity_crayfish(self, sal):
 
     # === Ammonia Rules ===
     @Rule(
-        Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)),
+        Fact(ammonia=MATCH.amm & P(lambda x: x > 2.0)),
         Fact(fish_type="others")
     )
     def high_ammonia_others(self, amm):
-        if amm > 1.5:  # Extremely high ammonia
+        if amm > 3.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
                 "Immediately perform a partial water change to reduce ammonia levels. Increase aeration and reduce feeding to minimize ammonia production.",

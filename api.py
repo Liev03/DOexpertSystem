@@ -43,34 +43,31 @@ class OxygenPredictor(KnowledgeEngine):
             "category": category
         })
 
-    def finalize_decision(self):
-        """Includes all detected warnings, recommendations, and predictions."""
-        if not self.relevant_issues:
-            # Only show the "all parameters are optimal" message if NO issues are detected
-            self.positive_feedback.append({
-                "message": "✅ All water parameters are in optimal range!",
-                "suggestion": "Maintain regular monitoring and continue good pond management practices.",
-                "category": "overall"
-            })
-            self.most_relevant_warnings = []  # No warnings
-            self.most_relevant_recommendations = []  # No recommendations
-            self.predictions = []  # No predictions
-        else:
-            # Sort issues by severity (descending)
-            self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
+def finalize_decision(self):
+    """Includes all detected warnings, recommendations, and predictions."""
+    if not self.relevant_issues:
+        # If no issues are detected, add the suggestion to recommendations
+        self.most_relevant_recommendations = [
+            "Maintain regular monitoring and continue good pond management practices."
+        ]
+        self.most_relevant_warnings = []  # No warnings
+        self.predictions = []  # No predictions
+    else:
+        # Sort issues by severity (descending)
+        self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
 
-            # Extract all warnings
-            self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
+        # Extract all warnings
+        self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
 
-            # Extract all recommendations (no merging)
-            self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
+        # Extract all recommendations (no merging)
+        self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
 
-            # Extract all predictions
-            self.predictions = [issue["prediction"] for issue in self.relevant_issues]
+        # Extract all predictions
+        self.predictions = [issue["prediction"] for issue in self.relevant_issues]
 
-        # Handle positive feedback
-        self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
-        self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
+    # Handle positive feedback (if any)
+    self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
+    self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
 
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""

@@ -396,7 +396,7 @@ class OxygenPredictor(KnowledgeEngine):
     def low_ph_catfish(self, ph):
         self.add_issue(
             "⚠️ Low pH detected! Catfish prefer a pH between 6.5 and 8.0.",
-            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
             severity=3,
             category="ph",
             prediction="Catfish may become stressed and stop eating if pH is not corrected."
@@ -409,7 +409,7 @@ class OxygenPredictor(KnowledgeEngine):
     def low_ph_tilapia(self, ph):
         self.add_issue(
             "⚠️ Low pH detected for Tilapia!",
-            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
             severity=3,
             category="ph",
             prediction="Tilapia may become stressed and stop eating if pH is not corrected."
@@ -422,7 +422,7 @@ class OxygenPredictor(KnowledgeEngine):
     def low_ph_crayfish(self, ph):
         self.add_issue(
             "⚠️ Low pH detected for Crayfish!",
-            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
             severity=3,
             category="ph",
             prediction="Crayfish may become stressed and stop eating if pH is not corrected."
@@ -563,7 +563,7 @@ class OxygenPredictor(KnowledgeEngine):
     def high_ph_standard(self, ph):
         self.add_issue(
             "⚠️ High pH detected! Water is too alkaline.",
-            "Add driftwood or peat moss to the tank to naturally lower pH and perform a partial water change to reduce alkalinity.",
+            "Perform a partial water change (20-30%) with fresh water. Add 1 teaspoon of white vinegar per 5 gallons to lower pH slightly and perform a partial water change to reduce alkalinity.",
             severity=3,
             category="ph",
             prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
@@ -576,7 +576,7 @@ class OxygenPredictor(KnowledgeEngine):
     def high_ph_catfish(self, ph):
         self.add_issue(
             "⚠️ High pH detected for Catfish!",
-            "Add driftwood or peat moss to the tank to naturally lower pH.",
+            "Perform a partial water change (20-30%) with fresh water. Add a handful of dry leaves (e.g., banana leaves) to the pond to naturally lower pH.",
             severity=3,
             category="ph",
             prediction="Catfish may experience stress and reduced growth if pH remains high."
@@ -589,7 +589,7 @@ class OxygenPredictor(KnowledgeEngine):
     def high_ph_tilapia(self, ph):
         self.add_issue(
             "⚠️ High pH detected for Tilapia!",
-            "Add driftwood or peat moss to the tank to naturally lower pH.",
+            "Perform a partial water change (20-30%) with fresh water. Add 1 teaspoon of white vinegar per 5 gallons to lower pH slightly.",
             severity=3,
             category="ph",
             prediction="Tilapia may experience stress and reduced growth if pH remains high."
@@ -602,7 +602,7 @@ class OxygenPredictor(KnowledgeEngine):
     def high_ph_crayfish(self, ph):
         self.add_issue(
             "⚠️ High pH detected for Crayfish!",
-            "Add driftwood or peat moss to the tank to naturally lower pH.",
+            "Perform a partial water change (20-30%) with fresh water. Add a handful of dry leaves (e.g., banana leaves) to the pond to naturally lower pH.",
             severity=3,
             category="ph",
             prediction="Crayfish may experience stress and reduced growth if pH remains high."

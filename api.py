@@ -25,7 +25,6 @@ class OxygenPredictor(KnowledgeEngine):
 
     def add_issue(self, warning, recommendation, severity, category, prediction):
         """Adds an issue while ensuring diversity in categories."""
-        # Check if the issue already exists to avoid duplicates
         if not any(issue["warning"] == warning for issue in self.relevant_issues):
             self.relevant_issues.append({
                 "warning": warning,
@@ -43,32 +42,31 @@ class OxygenPredictor(KnowledgeEngine):
             "category": category
         })
 
-def finalize_decision(self):
-    """Includes all detected warnings, recommendations, and predictions."""
-    if not self.relevant_issues:
-        # If no issues are detected, add the suggestion to recommendations
-        self.most_relevant_recommendations = [
-            "Maintain regular monitoring and continue good pond management practices."
-        ]
-        self.most_relevant_warnings = []  # No warnings
-        self.predictions = []  # No predictions
-    else:
-        # Sort issues by severity (descending)
-        self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
+    def finalize_decision(self):
+        """Includes all detected warnings, recommendations, and predictions."""
+        if not self.relevant_issues:
+            # If no issues are detected, add the suggestion to recommendations
+            self.most_relevant_recommendations = [
+                "Maintain regular monitoring and continue good pond management practices."
+            ]
+            self.most_relevant_warnings = []  # No warnings
+            self.predictions = []  # No predictions
+        else:
+            # Sort issues by severity (descending)
+            self.relevant_issues.sort(key=lambda x: x["severity"], reverse=True)
 
-        # Extract all warnings
-        self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
+            # Extract all warnings
+            self.most_relevant_warnings = [issue["warning"] for issue in self.relevant_issues]
 
-        # Extract all recommendations (no merging)
-        self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
+            # Extract all recommendations (no merging)
+            self.most_relevant_recommendations = [issue["recommendation"] for issue in self.relevant_issues]
 
-        # Extract all predictions
-        self.predictions = [issue["prediction"] for issue in self.relevant_issues]
+            # Extract all predictions
+            self.predictions = [issue["prediction"] for issue in self.relevant_issues]
 
-    # Handle positive feedback (if any)
-    self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
-    self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
-
+        # Handle positive feedback (if any)
+        self.positive_messages = [feedback["message"] for feedback in self.positive_feedback]
+        self.positive_suggestions = [feedback["suggestion"] for feedback in self.positive_feedback]
     def get_time_of_day(self):
         """Returns the current time period (morning, afternoon, evening, night) based on Philippine Time."""
         local_timezone = pytz.timezone("Asia/Manila")  # Set timezone to the Philippines

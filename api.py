@@ -408,7 +408,7 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def low_ph_tilapia(self, ph):
         self.add_issue(
-            "⚠️ Low pH detected! Tilapia prefer a pH between 6.5 and 8.5.",
+            "⚠️ Low pH detected for Tilapia!",
             "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
@@ -421,7 +421,7 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def low_ph_crayfish(self, ph):
         self.add_issue(
-            "⚠️ Low pH detected! Crayfish prefer a pH between 6.5 and 7.5.",
+            "⚠️ Low pH detected for Crayfish!",
             "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
@@ -447,7 +447,7 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def high_ph_catfish(self, ph):
         self.add_issue(
-            "⚠️ High pH detected! Catfish prefer a pH between 6.5 and 8.0.",
+            "⚠️ High pH detected for Catfish!",
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
@@ -460,7 +460,7 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def high_ph_tilapia(self, ph):
         self.add_issue(
-            "⚠️ High pH detected! Tilapia prefer a pH between 6.5 and 8.5.",
+            "⚠️ High pH detected for Tilapia!",
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
@@ -473,7 +473,7 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def high_ph_crayfish(self, ph):
         self.add_issue(
-            "⚠️ High pH detected! Crayfish prefer a pH between 6.5 and 7.5.",
+            "⚠️ High pH detected for Crayfish!",
             "Add driftwood or peat moss to the tank to naturally lower pH.",
             severity=3,
             category="ph",
@@ -500,8 +500,9 @@ class OxygenPredictor(KnowledgeEngine):
         Fact(fish_type="catfish")
     )
     def high_salinity_catfish(self, sal):
+        time_period = self.get_time_of_day()
         self.add_issue(
-            "⚠️ High salinity detected! Catfish prefer salinity levels below 5 ppt.",
+            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Catfish!",
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",
@@ -513,8 +514,9 @@ class OxygenPredictor(KnowledgeEngine):
         Fact(fish_type="tilapia")
     )
     def high_salinity_tilapia(self, sal):
+        time_period = self.get_time_of_day()
         self.add_issue(
-            "⚠️ High salinity detected! Tilapia prefer salinity levels below 5 ppt.",
+            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Tilapia!",
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",
@@ -526,8 +528,9 @@ class OxygenPredictor(KnowledgeEngine):
         Fact(fish_type="crayfish")
     )
     def high_salinity_crayfish(self, sal):
+        time_period = self.get_time_of_day()
         self.add_issue(
-            "⚠️ High salinity detected! Crayfish prefer salinity levels below 1 ppt.",
+            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Crayfish!",
             "Dilute the water by adding fresh water gradually.",
             severity=3,
             category="salinity",

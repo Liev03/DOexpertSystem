@@ -428,6 +428,134 @@ class OxygenPredictor(KnowledgeEngine):
             prediction="Crayfish may become stressed and stop eating if pH is not corrected."
         )
 
+        # === Low Temperature Rules for Standard Fish ===
+    @Rule(
+        Fact(temperature=MATCH.temp & P(lambda x: x < 24)),
+        Fact(fish_type="standard")
+    )
+    def low_temperature_standard(self, temp):
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "❄️ Low morning temperatures detected! Fish may become sluggish.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Fish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        elif time_period == "night":
+            self.add_issue(
+                "❄️ Low nighttime temperatures detected! Fish may become sluggish.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Monitor fish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Fish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "❄️ Low temperatures detected! Fish may become sluggish.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Fish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+
+    # === Low Temperature Rules for Catfish ===
+    @Rule(
+        Fact(temperature=MATCH.temp & P(lambda x: x < 25)),
+        Fact(fish_type="catfish")
+    )
+    def low_temperature_catfish(self, temp):
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "❄️ Low morning temperatures detected for Catfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        elif time_period == "night":
+            self.add_issue(
+                "❄️ Low nighttime temperatures detected for Catfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Monitor catfish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "❄️ Low temperatures detected for Catfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Catfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+
+    # === Low Temperature Rules for Tilapia ===
+    @Rule(
+        Fact(temperature=MATCH.temp & P(lambda x: x < 26)),
+        Fact(fish_type="tilapia")
+    )
+    def low_temperature_tilapia(self, temp):
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "❄️ Low morning temperatures detected! Not ideal for Tilapia.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        elif time_period == "night":
+            self.add_issue(
+                "❄️ Low nighttime temperatures detected! Too cold for Tilapia.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Monitor tilapia behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "❄️ Low temperatures detected! Too cold for Tilapia.",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Tilapia may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+
+    # === Low Temperature Rules for Crayfish ===
+    @Rule(
+        Fact(temperature=MATCH.temp & P(lambda x: x < 18)),
+        Fact(fish_type="crayfish")
+    )
+    def low_temperature_crayfish(self, temp):
+        time_period = self.get_time_of_day()
+        if time_period == "morning":
+            self.add_issue(
+                "❄️ Low morning temperatures detected for Crayfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        elif time_period == "night":
+            self.add_issue(
+                "❄️ Low nighttime temperatures detected for Crayfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Monitor crayfish behavior for signs of stress.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+        else:
+            self.add_issue(
+                "❄️ Low temperatures detected for Crayfish!",
+                "Increase water temperature using a heater or by covering the pond to retain heat. Avoid sudden temperature changes.",
+                severity=3,
+                category="temperature",
+                prediction="Crayfish may become sluggish, stop eating, and become more susceptible to diseases if temperatures remain low."
+            )
+
     @Rule(
         Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)),
         Fact(fish_type="standard")

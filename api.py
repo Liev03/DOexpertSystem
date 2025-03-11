@@ -609,61 +609,81 @@ class OxygenPredictor(KnowledgeEngine):
         )
 
     # === Salinity Rules ===
-    @Rule(
-        Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)),
-        Fact(fish_type="standard")
+@Rule(
+    Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)),
+    Fact(fish_type="standard")
+)
+def high_salinity_standard(self, sal):
+    time_period = self.get_time_of_day()
+    if time_period:
+        warning = f"⚠️ High salinity detected in the {time_period}! Potential stress on freshwater fish."
+    else:
+        warning = "⚠️ High salinity detected! Potential stress on freshwater fish."
+    
+    self.add_issue(
+        warning,
+        "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
+        severity=3,
+        category="salinity",
+        prediction="Freshwater fish may experience osmotic stress, leading to dehydration and death if salinity remains high."
     )
-    def high_salinity_standard(self, sal):
-        time_period = self.get_time_of_day()
-        self.add_issue(
-            f"⚠️ High salinity detected{' in the ' + time_period if time_period else ''}! Potential stress on freshwater fish.",
-            "Dilute the water by adding fresh water gradually. Identify and remove sources of salt contamination.",
-            severity=3,
-            category="salinity",
-            prediction="Freshwater fish may experience osmotic stress, leading to dehydration and death if salinity remains high."
-        )
 
-    @Rule(
-        Fact(salinity=MATCH.sal & P(lambda x: x > 5)),
-        Fact(fish_type="catfish")
+@Rule(
+    Fact(salinity=MATCH.sal & P(lambda x: x > 5)),
+    Fact(fish_type="catfish")
+)
+def high_salinity_catfish(self, sal):
+    time_period = self.get_time_of_day()
+    if time_period:
+        warning = f"⚠️ High salinity detected in the {time_period} for Catfish!"
+    else:
+        warning = "⚠️ High salinity detected for Catfish!"
+    
+    self.add_issue(
+        warning,
+        "Dilute the water by adding fresh water gradually.",
+        severity=3,
+        category="salinity",
+        prediction="Catfish may experience osmotic stress if salinity remains high."
     )
-    def high_salinity_catfish(self, sal):
-        time_period = self.get_time_of_day()
-        self.add_issue(
-            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Catfish!",
-            "Dilute the water by adding fresh water gradually.",
-            severity=3,
-            category="salinity",
-            prediction="Catfish may experience osmotic stress if salinity remains high."
-        )
+    
+@Rule(
+    Fact(salinity=MATCH.sal & P(lambda x: x > 5)),
+    Fact(fish_type="tilapia")
+)
+def high_salinity_tilapia(self, sal):
+    time_period = self.get_time_of_day()
+    if time_period:
+        warning = f"⚠️ High salinity detected in the {time_period} for Tilapia!"
+    else:
+        warning = "⚠️ High salinity detected for Tilapia!"
+    
+    self.add_issue(
+        warning,
+        "Dilute the water by adding fresh water gradually.",
+        severity=3,
+        category="salinity",
+        prediction="Tilapia may experience osmotic stress if salinity remains high."
+    )
 
-    @Rule(
-        Fact(salinity=MATCH.sal & P(lambda x: x > 5)),
-        Fact(fish_type="tilapia")
+@Rule(
+    Fact(salinity=MATCH.sal & P(lambda x: x > 1)),
+    Fact(fish_type="crayfish")
+)
+def high_salinity_crayfish(self, sal):
+    time_period = self.get_time_of_day()
+    if time_period:
+        warning = f"⚠️ High salinity detected in the {time_period} for Crayfish!"
+    else:
+        warning = "⚠️ High salinity detected for Crayfish!"
+    
+    self.add_issue(
+        warning,
+        "Dilute the water by adding fresh water gradually.",
+        severity=3,
+        category="salinity",
+        prediction="Crayfish may experience osmotic stress if salinity remains high."
     )
-    def high_salinity_tilapia(self, sal):
-        time_period = self.get_time_of_day()
-        self.add_issue(
-            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Tilapia!",
-            "Dilute the water by adding fresh water gradually.",
-            severity=3,
-            category="salinity",
-            prediction="Tilapia may experience osmotic stress if salinity remains high."
-        )
-
-    @Rule(
-        Fact(salinity=MATCH.sal & P(lambda x: x > 1)),
-        Fact(fish_type="crayfish")
-    )
-    def high_salinity_crayfish(self, sal):
-        time_period = self.get_time_of_day()
-        self.add_issue(
-            "⚠️ High salinity detected{' in the ' + time_period if time_period else ''} for Crayfish!",
-            "Dilute the water by adding fresh water gradually.",
-            severity=3,
-            category="salinity",
-            prediction="Crayfish may experience osmotic stress if salinity remains high."
-        )
 
     # === Ammonia Rules ===
     @Rule(

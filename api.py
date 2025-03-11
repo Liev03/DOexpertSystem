@@ -367,120 +367,66 @@ class OxygenPredictor(KnowledgeEngine):
             )
 
     # === pH Rules ===
-# === Low pH Rules ===
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x < 5)),
-    Fact(fish_type="standard")
-)
-def low_ph_standard(self, ph):
-    if ph < 3.0:  # Extremely low pH
+    @Rule(
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 5)),
+        Fact(fish_type="standard")
+    )
+    def low_ph_standard(self, ph):
+        if ph < 3.0:  # Extremely low pH
+            self.add_issue(
+                "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
+                "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
+                severity=5,
+                category="ph",
+                prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
+            )
+        else:  # Moderately low pH
+            self.add_issue(
+                "⚠️ Low pH detected! Water is too acidic.",
+                "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
+                severity=3,
+                category="ph",
+                prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
+            )
+
+    @Rule(
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
+        Fact(fish_type="catfish")
+    )
+    def low_ph_catfish(self, ph):
         self.add_issue(
-            "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
-            "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
-            severity=5,
-            category="ph",
-            prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
-        )
-    else:  # Moderately low pH
-        self.add_issue(
-            "⚠️ Low pH detected! Water is too acidic.",
-            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
+            "⚠️ Low pH detected! Catfish prefer a pH between 6.5 and 8.0.",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
             severity=3,
             category="ph",
-            prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."
+            prediction="Catfish may become stressed and stop eating if pH is not corrected."
         )
 
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
-    Fact(fish_type="catfish")
-)
-def low_ph_catfish(self, ph):
-    self.add_issue(
-        "⚠️ Low pH detected! Catfish prefer a pH between 6.5 and 8.0.",
-        "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
-        severity=3,
-        category="ph",
-        prediction="Catfish may become stressed and stop eating if pH is not corrected."
+    @Rule(
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
+        Fact(fish_type="tilapia")
     )
+    def low_ph_tilapia(self, ph):
+        self.add_issue(
+            "⚠️ Low pH detected for Tilapia!",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
+            severity=3,
+            category="ph",
+            prediction="Tilapia may become stressed and stop eating if pH is not corrected."
+        )
 
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
-    Fact(fish_type="tilapia")
-)
-def low_ph_tilapia(self, ph):
-    self.add_issue(
-        "⚠️ Low pH detected for Tilapia!",
-        "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
-        severity=3,
-        category="ph",
-        prediction="Tilapia may become stressed and stop eating if pH is not corrected."
+    @Rule(
+        Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
+        Fact(fish_type="crayfish")
     )
-
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x < 6.5)),
-    Fact(fish_type="crayfish")
-)
-def low_ph_crayfish(self, ph):
-    self.add_issue(
-        "⚠️ Low pH detected for Crayfish!",
-        "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually. Place limestone or crushed eggshells in the pond to stabilize pH.",
-        severity=3,
-        category="ph",
-        prediction="Crayfish may become stressed and stop eating if pH is not corrected."
-    )
-
-# === High pH Rules ===
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)),
-    Fact(fish_type="standard")
-)
-def high_ph_standard(self, ph):
-    self.add_issue(
-        "⚠️ High pH detected! Water is too alkaline.",
-        "Perform a partial water change (20-30%) with fresh water. Add 1 teaspoon of white vinegar per 5 gallons to lower pH slightly.",
-        severity=3,
-        category="ph",
-        prediction="Fish may experience stress, reduced growth, and increased susceptibility to diseases if pH remains high."
-    )
-
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x > 8.0)),
-    Fact(fish_type="catfish")
-)
-def high_ph_catfish(self, ph):
-    self.add_issue(
-        "⚠️ High pH detected for Catfish!",
-        "Perform a partial water change (20-30%) with fresh water. Add a handful of dry leaves (e.g., banana leaves) to the pond to naturally lower pH.",
-        severity=3,
-        category="ph",
-        prediction="Catfish may experience stress and reduced growth if pH remains high."
-    )
-
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)),
-    Fact(fish_type="tilapia")
-)
-def high_ph_tilapia(self, ph):
-    self.add_issue(
-        "⚠️ High pH detected for Tilapia!",
-        "Perform a partial water change (20-30%) with fresh water. Add 1 teaspoon of white vinegar per 5 gallons to lower pH slightly.",
-        severity=3,
-        category="ph",
-        prediction="Tilapia may experience stress and reduced growth if pH remains high."
-    )
-
-@Rule(
-    Fact(ph_level=MATCH.ph & P(lambda x: x > 7.5)),
-    Fact(fish_type="crayfish")
-)
-def high_ph_crayfish(self, ph):
-    self.add_issue(
-        "⚠️ High pH detected for Crayfish!",
-        "Perform a partial water change (20-30%) with fresh water. Add a handful of dry leaves (e.g., banana leaves) to the pond to naturally lower pH.",
-        severity=3,
-        category="ph",
-        prediction="Crayfish may experience stress and reduced growth if pH remains high."
-    )
+    def low_ph_crayfish(self, ph):
+        self.add_issue(
+            "⚠️ Low pH detected for Crayfish!",
+            "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually.",
+            severity=3,
+            category="ph",
+            prediction="Crayfish may become stressed and stop eating if pH is not corrected."
+        )
 
         # === Low Temperature Rules for Standard Fish ===
     @Rule(

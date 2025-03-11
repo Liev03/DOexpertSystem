@@ -21,7 +21,7 @@ class OxygenPredictor(KnowledgeEngine):
         self.most_relevant_warnings = []  # Initialize to avoid AttributeError
         self.most_relevant_recommendations = []  # Initialize to avoid AttributeError
         self.predictions = []  # Store predictions for each issue
-        self.fish_type = "standard"  # Default fish type
+        self.fish_type = "others"  # Default fish type
 
     def add_issue(self, warning, recommendation, severity, category, prediction):
         """Adds an issue while ensuring diversity in categories."""
@@ -85,10 +85,10 @@ class OxygenPredictor(KnowledgeEngine):
             return "night"
 
     # === Fish Type Rules ===
-    @Rule(Fact(fish_type="standard"))
-    def set_standard_fish_type(self):
-        """Set fish type to standard."""
-        self.fish_type = "standard"
+    @Rule(Fact(fish_type="others"))
+    def set_others_fish_type(self):
+        """Set fish type to others."""
+        self.fish_type = "others"
 
     @Rule(Fact(fish_type="catfish"))
     def set_catfish_fish_type(self):
@@ -105,12 +105,12 @@ class OxygenPredictor(KnowledgeEngine):
         """Set fish type to crayfish."""
         self.fish_type = "crayfish"
 
-    # === Oxygen Rules for Standard Fish ===
+    # === Oxygen Rules for others Fish ===
     @Rule(
         Fact(dissolved_oxygen=MATCH.do & P(lambda x: x < 6)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def critically_low_oxygen_standard(self, do):
+    def critically_low_oxygen_others(self, do):
         time_period = self.get_time_of_day()
         if time_period == "night":
             self.add_issue(
@@ -201,12 +201,12 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
             )
 
-    # === Temperature Rules for Standard Fish ===
+    # === Temperature Rules for others Fish ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x > 27)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def high_temperature_standard(self, temp):
+    def high_temperature_others(self, temp):
         time_period = self.get_time_of_day()
         if time_period == "morning":
             self.add_issue(
@@ -364,9 +364,9 @@ class OxygenPredictor(KnowledgeEngine):
     # === pH Rules ===
     @Rule(
         Fact(ph_level=MATCH.ph & P(lambda x: x < 5)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def low_ph_standard(self, ph):
+    def low_ph_others(self, ph):
         if ph < 3.0:  # Extremely low pH
             self.add_issue(
                 "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
@@ -423,12 +423,12 @@ class OxygenPredictor(KnowledgeEngine):
             prediction="Crayfish may become stressed and stop eating if pH is not corrected."
         )
 
-        # === Low Temperature Rules for Standard Fish ===
+        # === Low Temperature Rules for others Fish ===
     @Rule(
         Fact(temperature=MATCH.temp & P(lambda x: x < 24)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def low_temperature_standard(self, temp):
+    def low_temperature_others(self, temp):
         time_period = self.get_time_of_day()
         if time_period == "morning":
             self.add_issue(
@@ -553,9 +553,9 @@ class OxygenPredictor(KnowledgeEngine):
 
     @Rule(
         Fact(ph_level=MATCH.ph & P(lambda x: x > 8.5)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def high_ph_standard(self, ph):
+    def high_ph_others(self, ph):
         self.add_issue(
             "⚠️ High pH detected! Water is too alkaline.",
             "Perform a partial water change (20-30%) with fresh water. Add 1 teaspoon of white vinegar per 5 gallons to lower pH slightly and perform a partial water change to reduce alkalinity.",
@@ -606,9 +606,9 @@ class OxygenPredictor(KnowledgeEngine):
     # === Salinity Rules ===
 @Rule(
     Fact(salinity=MATCH.sal & P(lambda x: x > 0.3)),
-    Fact(fish_type="standard")
+    Fact(fish_type="others")
 )
-def high_salinity_standard(self, sal):
+def high_salinity_others(self, sal):
     time_period = self.get_time_of_day()
     if time_period:
         warning = f"⚠️ High salinity detected in the {time_period}! Potential stress on freshwater fish."
@@ -683,9 +683,9 @@ def high_salinity_crayfish(self, sal):
     # === Ammonia Rules ===
     @Rule(
         Fact(ammonia=MATCH.amm & P(lambda x: x > 0.5)),
-        Fact(fish_type="standard")
+        Fact(fish_type="others")
     )
-    def high_ammonia_standard(self, amm):
+    def high_ammonia_others(self, amm):
         if amm > 1.5:  # Extremely high ammonia
             self.add_issue(
                 "⚠️ Extremely high ammonia levels detected! Toxic to fish.",
@@ -787,7 +787,7 @@ def predict():
             logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
             return jsonify({"error": f"{key} must be non-negative!"}), 400
 
-    fish_type = data.get('fish_type', 'standard')  # Default to "standard" if not specified
+    fish_type = data.get('fish_type', 'others')  # Default to "others" if not specified
 
     predictor = OxygenPredictor()
     predictor.reset()

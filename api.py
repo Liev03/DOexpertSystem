@@ -119,7 +119,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may suffocate and die if oxygen levels remain critically low."
@@ -127,7 +127,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
-                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -143,7 +143,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Catfish may suffocate and die if oxygen levels remain critically low."
@@ -151,7 +151,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Catfish may be lethargic or surfacing.",
-                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Catfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -167,7 +167,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Tilapia may suffocate and die if oxygen levels remain critically low."
@@ -175,7 +175,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Tilapia may be lethargic or surfacing.",
-                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Tilapia may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -191,7 +191,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Crayfish may suffocate and die if oxygen levels remain critically low."
@@ -199,7 +199,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Crayfish may be lethargic or surfacing.",
-                "Immediately activate all aerators if available and increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
                 severity=4,
                 category="oxygen",
                 prediction="Crayfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -374,7 +374,7 @@ class OxygenPredictor(KnowledgeEngine):
         if ph < 4.0:  # Extremely low pH
             self.add_issue(
                 "⚠️ Extremely low pH detected! Water is highly acidic and dangerous for fish.",
-                "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH and perform a partial water change to reduce acidity.",
+                "Immediately add baking soda (1 teaspoon per 5 gallons) to raise pH or perform a partial water change to reduce acidity.",
                 severity=5,
                 category="ph",
                 prediction="Fish may experience severe stress, tissue damage, and death if pH remains extremely low."
@@ -382,7 +382,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:  # Moderately low pH
             self.add_issue(
                 "⚠️ Low pH detected! Water is too acidic.",
-                "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually and perform a partial water change to dilute acidity.",
+                "Add baking soda (1/2 teaspoon per 5 gallons) to raise pH gradually or perform a partial water change to dilute acidity.",
                 severity=3,
                 category="ph",
                 prediction="Fish may become stressed, stop eating, and develop health issues if pH is not corrected."

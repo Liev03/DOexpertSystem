@@ -119,7 +119,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may suffocate and die if oxygen levels remain critically low."
@@ -127,7 +127,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Fish may be lethargic or surfacing.",
-                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
                 severity=4,
                 category="oxygen",
                 prediction="Fish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -143,7 +143,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
                 prediction="Catfish may suffocate and die if oxygen levels remain critically low."
@@ -151,7 +151,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Catfish may be lethargic or surfacing.",
-                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
                 severity=4,
                 category="oxygen",
                 prediction="Catfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -167,7 +167,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
                 prediction="Tilapia may suffocate and die if oxygen levels remain critically low."
@@ -175,7 +175,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Tilapia may be lethargic or surfacing.",
-                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
                 severity=4,
                 category="oxygen",
                 prediction="Tilapia may become lethargic, stop eating, and eventually die if oxygen levels are not increased."
@@ -191,7 +191,7 @@ class OxygenPredictor(KnowledgeEngine):
         if time_period == "night":
             self.add_issue(
                 "⚠️ Nighttime oxygen depletion!",
-                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen. Activating automated aearators.",
+                "Increase water circulation at night to prevent oxygen crashes. Avoid overfeeding fish, as uneaten food can consume oxygen.",
                 severity=4,
                 category="oxygen",
                 prediction="Crayfish may suffocate and die if oxygen levels remain critically low."
@@ -199,7 +199,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Critically low oxygen levels! Crayfish may be lethargic or surfacing.",
-                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding. Activating automated aearators.",
+                "Increase water circulation. Reduce organic waste by cleaning debris and avoiding overfeeding.",
                 severity=4,
                 category="oxygen",
                 prediction="Crayfish may become lethargic, stop eating, and eventually die if oxygen levels are not increased."

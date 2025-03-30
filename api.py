@@ -773,13 +773,82 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and increased susceptibility to diseases if ammonia levels remain high."
             )
 
+    # === Turbidity Rules for General Fish ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
+        Fact(fish_type="others")
+    )
+    def high_turbidity_others(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity detected! Water is too cloudy.",
+            "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",
+            severity=3,
+            category="turbidity",
+            prediction="Fish may experience gill irritation and reduced growth if turbidity remains high."
+        )
+
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
+        Fact(fish_type="others")
+    )
+    def extremely_high_turbidity_others(self, turb):
+        self.add_issue(
+            "⚠️ Extremely high turbidity detected! Dangerous for fish.",
+            "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",
+            severity=5,
+            category="turbidity",
+            prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
+        )
+
+    # === Turbidity Rules for Catfish ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
+        Fact(fish_type="catfish")
+    )
+    def high_turbidity_catfish(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for catfish! They prefer clearer water.",
+            "Reduce feeding and improve filtration. Catfish can tolerate some turbidity but not excessive levels.",
+            severity=3,
+            category="turbidity",
+            prediction="Catfish may experience reduced feeding efficiency in very turbid water."
+        )
+
+    # === Turbidity Rules for Tilapia ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 40)),
+        Fact(fish_type="tilapia")
+    )
+    def high_turbidity_tilapia(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for tilapia! Affects their feeding.",
+            "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
+            severity=3,
+            category="turbidity",
+            prediction="Tilapia may stop eating if water becomes too cloudy."
+        )
+
+    # === Turbidity Rules for Crayfish ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
+        Fact(fish_type="crayfish")
+    )
+    def high_turbidity_crayfish(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for crayfish! Affects their molting.",
+            "Reduce sediment disturbance and improve filtration. Crayfish need clear water for proper molting.",
+            severity=3,
+            category="turbidity",
+            prediction="Crayfish may have molting problems in very turbid water."
+        )
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")
 
-    # Check if required keys are present
-    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia"]
+    # Updated required keys to include turbidity
+    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia", "turbidity"]
     for key in required_keys:
         if key not in data:
             logger.error(f"Missing key in input data: {key}")
@@ -791,7 +860,7 @@ def predict():
             logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
             return jsonify({"error": f"{key} must be non-negative!"}), 400
 
-    fish_type = data.get('fish_type', 'others')  # Default to "others" if not specified
+    fish_type = data.get('fish_type', 'others')
 
     predictor = OxygenPredictor()
     predictor.reset()

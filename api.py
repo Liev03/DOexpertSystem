@@ -223,7 +223,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "afternoon":
             self.add_issue(
                 "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
-                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption. Avoid direct sunlight exposure.",
                 severity=3,
                 category="temperature",
                 prediction="Prolonged high temperatures can lead to fish stress, reduced appetite, and increased mortality."
@@ -231,7 +231,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "evening":
             self.add_issue(
                 "🔥 High evening temperatures detected! Oxygen levels may drop.",
-                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                "Increase aeration and water circulation to cool the water.",
                 severity=3,
                 category="temperature",
                 prediction="Fish may become stressed and lethargic if water temperatures remain high."
@@ -263,7 +263,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "afternoon":
             self.add_issue(
                 "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
-                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption. Avoid direct sunlight exposure.",
                 severity=3,
                 category="temperature",
                 prediction="Prolonged high temperatures can lead to catfish stress, reduced appetite, and increased mortality."
@@ -271,7 +271,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "evening":
             self.add_issue(
                 "🔥 High evening temperatures detected! Oxygen levels may drop.",
-                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                "Increase aeration and water circulation to cool the water.",
                 severity=3,
                 category="temperature",
                 prediction="Catfish may become stressed and lethargic if water temperatures remain high."
@@ -303,7 +303,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "afternoon":
             self.add_issue(
                 "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
-                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption. Avoid direct sunlight exposure.",
                 severity=3,
                 category="temperature",
                 prediction="Prolonged high temperatures can lead to tilapia stress, reduced appetite, and increased mortality."
@@ -311,7 +311,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "evening":
             self.add_issue(
                 "🔥 High evening temperatures detected! Oxygen levels may drop.",
-                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                "Increase aeration and water circulation to cool the water.",
                 severity=3,
                 category="temperature",
                 prediction="Tilapia may become stressed and lethargic if water temperatures remain high."
@@ -343,7 +343,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "afternoon":
             self.add_issue(
                 "🔥 High afternoon temperatures detected! Oxygen levels may drop.",
-                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption.",
+                "Provide shade using floating plants or shade cloths. Increase water depth to reduce heat absorption. Avoid direct sunlight exposure.",
                 severity=3,
                 category="temperature",
                 prediction="Prolonged high temperatures can lead to crayfish stress, reduced appetite, and increased mortality."
@@ -351,7 +351,7 @@ class OxygenPredictor(KnowledgeEngine):
         elif time_period == "evening":
             self.add_issue(
                 "🔥 High evening temperatures detected! Oxygen levels may drop.",
-                "Increase aeration and water circulation to cool the water. Avoid direct sunlight exposure.",
+                "Increase aeration and water circulation to cool the water.",
                 severity=3,
                 category="temperature",
                 prediction="Crayfish may become stressed and lethargic if water temperatures remain high."

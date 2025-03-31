@@ -780,21 +780,21 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def high_turbidity_others(self, turb):
         if turb > 100:
-        self.add_issue(
-            "⚠️ Extremely high turbidity detected! Dangerous for fish.",
-            "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",
-            severity=5,
-            category="turbidity",
-            prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
-        )
+            self.add_issue(
+                "⚠️ Extremely high turbidity detected! Dangerous for fish.",
+                "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",
+                severity=5,
+                category="turbidity",
+                prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
+            )
         else:
-        self.add_issue(
-            "⚠️ High turbidity detected! Water is too cloudy.",
-            "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",
-            severity=3,
-            category="turbidity",
-            prediction="Fish may experience gill irritation and reduced growth if turbidity remains high."
-        )
+            self.add_issue(
+                "⚠️ High turbidity detected! Water is too cloudy.",
+                "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",
+                severity=3,
+                category="turbidity",
+                prediction="Fish may experience gill irritation and reduced growth if turbidity remains high."
+            )
 
     # === Turbidity Rules for Catfish ===
     @Rule(

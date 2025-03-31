@@ -787,7 +787,7 @@ class OxygenPredictor(KnowledgeEngine):
             category="turbidity",
             prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
         )
-        else
+        else:
         self.add_issue(
             "⚠️ High turbidity detected! Water is too cloudy.",
             "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",

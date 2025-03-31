@@ -802,30 +802,30 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Turbidity Rules for Catfish ===
     @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
         Fact(fish_type="catfish")
     )
     def high_turbidity_catfish(self, turb):
         self.add_issue(
-            "⚠️ High turbidity for catfish! They prefer clearer water.",
+            "⚠️ High turbidity for catfish! Catfish feeding reduced and prefer clearer water.",
             "Reduce feeding and improve filtration. Catfish can tolerate some turbidity but not excessive levels.",
             severity=3,
             category="turbidity",
-            prediction="Catfish may experience reduced feeding efficiency in very turbid water."
+            prediction="Catfish growth may slow down. Significant growth reduction if prolonged."
         )
 
     # === Turbidity Rules for Tilapia ===
     @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 40)),
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
         Fact(fish_type="tilapia")
     )
     def high_turbidity_tilapia(self, turb):
         self.add_issue(
-            "⚠️ High turbidity for tilapia! Affects their feeding.",
-            "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
+            "⚠️ High turbidity for tilapia! Affects their feeding and reduced growth.",
+            "Improve water circulation. Tilapia are visual feeders and need clearer water. Stop feeding for 24hrs and increase aeration if high turbidity persists.",
             severity=3,
             category="turbidity",
-            prediction="Tilapia may stop eating if water becomes too cloudy."
+            prediction="Tilapia may stop eating if water becomes too cloudy. Stunted growth likely without intervention."
         )
 
     # === Turbidity Rules for Crayfish ===
@@ -835,11 +835,11 @@ class OxygenPredictor(KnowledgeEngine):
     )
     def high_turbidity_crayfish(self, turb):
         self.add_issue(
-            "⚠️ High turbidity for crayfish! Affects their molting.",
+            "⚠️ High turbidity stressing Crayfish!",
             "Reduce sediment disturbance and improve filtration. Crayfish need clear water for proper molting.",
             severity=3,
             category="turbidity",
-            prediction="Crayfish may have molting problems in very turbid water."
+            prediction="Crayfish may have molting problems. Mass mortality during molting if left untreated."
         )
 
 @app.route('/predict', methods=['POST'])

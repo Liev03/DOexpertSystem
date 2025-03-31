@@ -773,45 +773,45 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and increased susceptibility to diseases if ammonia levels remain high."
             )
 
-    # === Turbidity Rules for General Fish ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
-        Fact(fish_type="others")
+# === Turbidity Rules for General Fish ("others") ===
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
+    Fact(fish_type="others")
+)
+def high_turbidity_others(self, turb):
+    self.add_issue(
+        "⚠️ High turbidity detected! Water is too cloudy.",
+        "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment.",
+        severity=3,
+        category="turbidity",
+        prediction="Fish may experience gill irritation and reduced growth."
     )
-    def high_turbidity_others(self, turb):
-        self.add_issue(
-            "⚠️ High turbidity detected! Water is too cloudy.",
-            "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",
-            severity=3,
-            category="turbidity",
-            prediction="Fish may experience gill irritation and reduced growth if turbidity remains high."
-        )
 
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
-        Fact(fish_type="others")
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
+    Fact(fish_type="others")
+)
+def extremely_high_turbidity_others(self, turb):
+    self.add_issue(
+        "⚠️ Extremely high turbidity detected! Dangerous for fish.",
+        "Immediately stop feeding and perform partial water changes. Add flocculants.",
+        severity=5,
+        category="turbidity",
+        prediction="Fish may suffocate from clogged gills."
     )
-    def extremely_high_turbidity_others(self, turb):
-        self.add_issue(
-            "⚠️ Extremely high turbidity detected! Dangerous for fish.",
-            "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",
-            severity=5,
-            category="turbidity",
-            prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
-        )
 
 # === Turbidity Rules for Catfish ===
 @Rule(
     Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
     Fact(fish_type="catfish")
 )
-def moderate_turbidity_catfish(self, turb):
+def high_turbidity_catfish(self, turb):
     self.add_issue(
-        "⚠️ Moderate turbidity for catfish (suboptimal but tolerable)",
-        "Monitor feeding behavior. Reduce stocking density if fish surface frequently.",
-        severity=2,
+        "⚠️ High turbidity for catfish!",
+        "Reduce feeding and improve filtration.",
+        severity=3,
         category="turbidity",
-        prediction="Growth may slow slightly in these conditions."
+        prediction="Reduced feeding efficiency expected."
     )
 
 @Rule(
@@ -821,7 +821,7 @@ def moderate_turbidity_catfish(self, turb):
 def extreme_turbidity_catfish(self, turb):
     self.add_issue(
         "🚨 Extremely high turbidity! Catfish feeding reduced",
-        "Stop feeding for 12 hours. Add aeration and perform a 20% water change.",
+        "Stop feeding for 12 hours. Add aeration and perform water change.",
         severity=4,
         category="turbidity",
         prediction="Significant growth reduction if prolonged."
@@ -832,13 +832,13 @@ def extreme_turbidity_catfish(self, turb):
     Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
     Fact(fish_type="tilapia")
 )
-def moderate_turbidity_tilapia(self, turb):
+def high_turbidity_tilapia(self, turb):
     self.add_issue(
-        "⚠️ Turbidity reducing tilapia feeding efficiency",
-         "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
+        "⚠️ Turbidity reducing tilapia feeding!",
+        "Increase feeding frequency with smaller portions.",
         severity=3,
         category="turbidity",
-        prediction="Tilapia may stop eating if water becomes too cloudy."
+        prediction="20% feed waste expected."
     )
 
 @Rule(
@@ -847,11 +847,11 @@ def moderate_turbidity_tilapia(self, turb):
 )
 def extreme_turbidity_tilapia(self, turb):
     self.add_issue(
-        "🚨 Critical turbidity! Tilapia growth reduced",
-        "Emergency: Stop feeding for 24h, add flocculants, and increase aeration.",
+        "🚨 Critical turbidity for tilapia!",
+        "Emergency: Stop feeding for 24h and increase aeration.",
         severity=5,
         category="turbidity",
-        prediction="Stunted growth likely without intervention."
+        prediction="Growth stunting likely."
     )
 
 # === Turbidity Rules for Crayfish ===
@@ -859,13 +859,13 @@ def extreme_turbidity_tilapia(self, turb):
     Fact(turbidity=MATCH.turb & P(lambda x: x > 20)),
     Fact(fish_type="crayfish")
 )
-def moderate_turbidity_crayfish(self, turb):
+def high_turbidity_crayfish(self, turb):
     self.add_issue(
-        "⚠️ Turbidity stressing crayfish",
-        "Add limestone rocks to stabilize sediment. Avoid disturbing pond bottom.",
+        "⚠️ High turbidity for crayfish!",
+        "Add limestone rocks and avoid disturbing sediment.",
         severity=3,
         category="turbidity",
-        prediction="Possible molting issues in these conditions."
+        prediction="Possible molting issues."
     )
 
 @Rule(
@@ -875,12 +875,12 @@ def moderate_turbidity_crayfish(self, turb):
 def extreme_turbidity_crayfish(self, turb):
     self.add_issue(
         "🚨 EMERGENCY: High crayfish mortality risk",
-        "Immediate action: 30% water change + banana-leaf filtration. Remove dead organisms.",
+        "Immediate action: 30% water change + banana-leaf filtration.",
         severity=5,
         category="turbidity",
-        prediction="Mass mortality during molting if untreated."
+        prediction="Mass mortality during molting."
     )
-
+    
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json

@@ -840,7 +840,7 @@ class OxygenPredictor(KnowledgeEngine):
             category="turbidity",
             prediction="Crayfish may have molting problems in very turbid water."
         )
-    
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json

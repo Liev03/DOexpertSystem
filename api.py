@@ -859,7 +859,7 @@ class OxygenPredictor(KnowledgeEngine):
         else:
             self.add_issue(
                 "⚠️ Turbidity stressing crayfish",
-                "Add limestone rocks to stabilize sediment. Avoid disturbing pond bottom.",
+                "Stop feeding the Crayfish and perform partial water changes. Add flocculants to clarify water if necessary.",
                 severity=3,
                 category="turbidity",
                 prediction="Possible molting issues in these conditions."

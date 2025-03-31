@@ -773,9 +773,6 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and increased susceptibility to diseases if ammonia levels remain high."
             )
 
-class OxygenPredictor(KnowledgeEngine):
-    # ... existing code ...
-
     # === Turbidity Rules for General Fish ===
     @Rule(
         Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
@@ -843,18 +840,6 @@ class OxygenPredictor(KnowledgeEngine):
             severity=3,
             category="turbidity",
             prediction="Crayfish may have molting problems in very turbid water."
-        )
-
-    # === Low Turbidity Rules (for all fish types) ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x < 5)),
-        Fact(fish_type=P(lambda x: x in ["others", "catfish", "tilapia", "crayfish"]))
-    )
-    def low_turbidity(self, turb):
-        self.add_positive_feedback(
-            "✓ Water clarity is excellent!",
-            "Maintain current practices to preserve water clarity.",
-            category="turbidity"
         )
 
 @app.route('/predict', methods=['POST'])

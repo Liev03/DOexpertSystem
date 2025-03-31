@@ -802,7 +802,7 @@ class OxygenPredictor(KnowledgeEngine):
 
 # === Turbidity Rules for Catfish ===
 @Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: 60 < x <= 100)),
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
     Fact(fish_type="catfish")
 )
 def moderate_turbidity_catfish(self, turb):
@@ -829,7 +829,7 @@ def extreme_turbidity_catfish(self, turb):
 
 # === Turbidity Rules for Tilapia ===
 @Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: 30 < x <= 50)),
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
     Fact(fish_type="tilapia")
 )
 def moderate_turbidity_tilapia(self, turb):
@@ -856,7 +856,7 @@ def extreme_turbidity_tilapia(self, turb):
 
 # === Turbidity Rules for Crayfish ===
 @Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: 20 < x <= 30)),
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 20)),
     Fact(fish_type="crayfish")
 )
 def moderate_turbidity_crayfish(self, turb):

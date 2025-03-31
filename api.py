@@ -798,17 +798,26 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Turbidity Rules for Catfish ===
     @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
         Fact(fish_type="catfish")
     )
-    def high_turbidity_catfish(self, turb):
-        self.add_issue(
-            "⚠️ High turbidity for catfish! Catfish feeding reduced and prefer clearer water.",
-            "Reduce feeding and improve filtration. Catfish can tolerate some turbidity but not excessive levels.",
-            severity=3,
-            category="turbidity",
-            prediction="Catfish growth may slow down. Significant growth reduction if prolonged."
-        )
+    def high_turbidity_cattfish(self, turb):
+        if turb > 100:
+            self.add_issue(
+                "🚨 Extremely high turbidity! Catfish feeding reduced",
+                "Stop feeding for 12 hours. Add aeration and perform a 20% water change.",
+                severity=4,
+                category="turbidity",
+                prediction="Significant growth reduction if prolonged."
+            )
+        else:
+            self.add_issue(
+                "⚠️ Moderate turbidity for catfish (suboptimal but tolerable)",
+                "Monitor feeding behavior. Reduce stocking density if fish surface frequently.",
+                severity=2,
+                category="turbidity",
+                prediction="Growth may slow slightly in these conditions."
+            )
 
     # === Turbidity Rules for Tilapia ===
     @Rule(

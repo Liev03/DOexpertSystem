@@ -842,12 +842,6 @@ class OxygenPredictor(KnowledgeEngine):
             prediction="Crayfish may have molting problems in very turbid water."
         )
 
-    # === Low Turbidity Rules (for all fish types) ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x < 5)),
-        Fact(fish_type=P(lambda x: x in ["others", "catfish", "tilapia", "crayfish"]))
-    )
-
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json

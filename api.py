@@ -800,47 +800,86 @@ class OxygenPredictor(KnowledgeEngine):
             prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
         )
 
-    # === Turbidity Rules for Catfish ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
-        Fact(fish_type="catfish")
+# === Turbidity Rules for Catfish ===
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: 60 < x <= 100)),
+    Fact(fish_type="catfish")
+)
+def moderate_turbidity_catfish(self, turb):
+    self.add_issue(
+        "⚠️ Moderate turbidity for catfish (suboptimal but tolerable)",
+        "Monitor feeding behavior. Reduce stocking density if fish surface frequently.",
+        severity=2,
+        category="turbidity",
+        prediction="Growth may slow slightly in these conditions."
     )
-    def high_turbidity_catfish(self, turb):
-        self.add_issue(
-            "⚠️ High turbidity for catfish! They prefer clearer water.",
-            "Reduce feeding and improve filtration. Catfish can tolerate some turbidity but not excessive levels.",
-            severity=3,
-            category="turbidity",
-            prediction="Catfish may experience reduced feeding efficiency in very turbid water."
-        )
 
-    # === Turbidity Rules for Tilapia ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 40)),
-        Fact(fish_type="tilapia")
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
+    Fact(fish_type="catfish")
+)
+def extreme_turbidity_catfish(self, turb):
+    self.add_issue(
+        "🚨 Extremely high turbidity! Catfish feeding reduced",
+        "Stop feeding for 12 hours. Add aeration and perform a 20% water change.",
+        severity=4,
+        category="turbidity",
+        prediction="Significant growth reduction if prolonged."
     )
-    def high_turbidity_tilapia(self, turb):
-        self.add_issue(
-            "⚠️ High turbidity for tilapia! Affects their feeding.",
-            "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
-            severity=3,
-            category="turbidity",
-            prediction="Tilapia may stop eating if water becomes too cloudy."
-        )
 
-    # === Turbidity Rules for Crayfish ===
-    @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
-        Fact(fish_type="crayfish")
+# === Turbidity Rules for Tilapia ===
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: 30 < x <= 50)),
+    Fact(fish_type="tilapia")
+)
+def moderate_turbidity_tilapia(self, turb):
+    self.add_issue(
+        "⚠️ Turbidity reducing tilapia feeding efficiency",
+         "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
+        severity=3,
+        category="turbidity",
+        prediction="Tilapia may stop eating if water becomes too cloudy."
     )
-    def high_turbidity_crayfish(self, turb):
-        self.add_issue(
-            "⚠️ High turbidity for crayfish! Affects their molting.",
-            "Reduce sediment disturbance and improve filtration. Crayfish need clear water for proper molting.",
-            severity=3,
-            category="turbidity",
-            prediction="Crayfish may have molting problems in very turbid water."
-        )
+
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
+    Fact(fish_type="tilapia")
+)
+def extreme_turbidity_tilapia(self, turb):
+    self.add_issue(
+        "🚨 Critical turbidity! Tilapia growth reduced",
+        "Emergency: Stop feeding for 24h, add flocculants, and increase aeration.",
+        severity=5,
+        category="turbidity",
+        prediction="Stunted growth likely without intervention."
+    )
+
+# === Turbidity Rules for Crayfish ===
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: 20 < x <= 30)),
+    Fact(fish_type="crayfish")
+)
+def moderate_turbidity_crayfish(self, turb):
+    self.add_issue(
+        "⚠️ Turbidity stressing crayfish",
+        "Add limestone rocks to stabilize sediment. Avoid disturbing pond bottom.",
+        severity=3,
+        category="turbidity",
+        prediction="Possible molting issues in these conditions."
+    )
+
+@Rule(
+    Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
+    Fact(fish_type="crayfish")
+)
+def extreme_turbidity_crayfish(self, turb):
+    self.add_issue(
+        "🚨 EMERGENCY: High crayfish mortality risk",
+        "Immediate action: 30% water change + banana-leaf filtration. Remove dead organisms.",
+        severity=5,
+        category="turbidity",
+        prediction="Mass mortality during molting if untreated."
+    )
 
 @app.route('/predict', methods=['POST'])
 def predict():

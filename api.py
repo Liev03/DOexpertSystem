@@ -779,7 +779,7 @@ class OxygenPredictor(KnowledgeEngine):
         Fact(fish_type="others")
     )
     def high_turbidity_others(self, turb):
-        if turb > 100
+        if turb > 100:
         self.add_issue(
             "⚠️ Extremely high turbidity detected! Dangerous for fish.",
             "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",

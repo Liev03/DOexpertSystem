@@ -816,7 +816,7 @@ class OxygenPredictor(KnowledgeEngine):
 
     # === Turbidity Rules for Tilapia ===
     @Rule(
-        Fact(turbidity=MATCH.turb & P(lambda x: x > 40)),
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
         Fact(fish_type="tilapia")
     )
     def high_turbidity_tilapia(self, turb):

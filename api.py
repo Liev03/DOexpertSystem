@@ -773,171 +773,108 @@ class OxygenPredictor(KnowledgeEngine):
                 prediction="Crayfish may experience stress and increased susceptibility to diseases if ammonia levels remain high."
             )
 
-# === Turbidity Rules for General Fish ("others") ===
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
-    Fact(fish_type="others")
-)
-def high_turbidity_others(self, turb):
-    self.add_issue(
-        "⚠️ High turbidity detected! Water is too cloudy.",
-        "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment.",
-        severity=3,
-        category="turbidity",
-        prediction="Fish may experience gill irritation and reduced growth."
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
+        Fact(fish_type="others")
     )
+    def high_turbidity_others(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity detected! Water is too cloudy.",
+            "Reduce feeding to minimize waste. Add aquatic plants to stabilize sediment. Consider using a settling pond or filter.",
+            severity=3,
+            category="turbidity",
+            prediction="Fish may experience gill irritation and reduced growth if turbidity remains high."
+        )
 
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
-    Fact(fish_type="others")
-)
-def extremely_high_turbidity_others(self, turb):
-    self.add_issue(
-        "⚠️ Extremely high turbidity detected! Dangerous for fish.",
-        "Immediately stop feeding and perform partial water changes. Add flocculants.",
-        severity=5,
-        category="turbidity",
-        prediction="Fish may suffocate from clogged gills."
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
+        Fact(fish_type="others")
     )
+    def extremely_high_turbidity_others(self, turb):
+        self.add_issue(
+            "⚠️ Extremely high turbidity detected! Dangerous for fish.",
+            "Immediately stop feeding and perform partial water changes. Add flocculants to clarify water if necessary.",
+            severity=5,
+            category="turbidity",
+            prediction="Fish may suffocate from clogged gills if turbidity is not reduced quickly."
+        )
 
-# === Turbidity Rules for Catfish ===
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
-    Fact(fish_type="catfish")
-)
-def high_turbidity_catfish(self, turb):
-    self.add_issue(
-        "⚠️ High turbidity for catfish!",
-        "Reduce feeding and improve filtration.",
-        severity=3,
-        category="turbidity",
-        prediction="Reduced feeding efficiency expected."
+    # === Turbidity Rules for Catfish ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 60)),
+        Fact(fish_type="catfish")
     )
+    def high_turbidity_catfish(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for catfish! They prefer clearer water.",
+            "Reduce feeding and improve filtration. Catfish can tolerate some turbidity but not excessive levels.",
+            severity=3,
+            category="turbidity",
+            prediction="Catfish may experience reduced feeding efficiency in very turbid water."
+        )
 
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 100)),
-    Fact(fish_type="catfish")
-)
-def extreme_turbidity_catfish(self, turb):
-    self.add_issue(
-        "🚨 Extremely high turbidity! Catfish feeding reduced",
-        "Stop feeding for 12 hours. Add aeration and perform water change.",
-        severity=4,
-        category="turbidity",
-        prediction="Significant growth reduction if prolonged."
+    # === Turbidity Rules for Tilapia ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 40)),
+        Fact(fish_type="tilapia")
     )
+    def high_turbidity_tilapia(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for tilapia! Affects their feeding.",
+            "Improve water circulation and reduce stocking density. Tilapia are visual feeders and need clearer water.",
+            severity=3,
+            category="turbidity",
+            prediction="Tilapia may stop eating if water becomes too cloudy."
+        )
 
-# === Turbidity Rules for Tilapia ===
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
-    Fact(fish_type="tilapia")
-)
-def high_turbidity_tilapia(self, turb):
-    self.add_issue(
-        "⚠️ Turbidity reducing tilapia feeding!",
-        "Increase feeding frequency with smaller portions.",
-        severity=3,
-        category="turbidity",
-        prediction="20% feed waste expected."
+    # === Turbidity Rules for Crayfish ===
+    @Rule(
+        Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
+        Fact(fish_type="crayfish")
     )
-
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 50)),
-    Fact(fish_type="tilapia")
-)
-def extreme_turbidity_tilapia(self, turb):
-    self.add_issue(
-        "🚨 Critical turbidity for tilapia!",
-        "Emergency: Stop feeding for 24h and increase aeration.",
-        severity=5,
-        category="turbidity",
-        prediction="Growth stunting likely."
-    )
-
-# === Turbidity Rules for Crayfish ===
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 20)),
-    Fact(fish_type="crayfish")
-)
-def high_turbidity_crayfish(self, turb):
-    self.add_issue(
-        "⚠️ High turbidity for crayfish!",
-        "Add limestone rocks and avoid disturbing sediment.",
-        severity=3,
-        category="turbidity",
-        prediction="Possible molting issues."
-    )
-
-@Rule(
-    Fact(turbidity=MATCH.turb & P(lambda x: x > 30)),
-    Fact(fish_type="crayfish")
-)
-def extreme_turbidity_crayfish(self, turb):
-    self.add_issue(
-        "🚨 EMERGENCY: High crayfish mortality risk",
-        "Immediate action: 30% water change + banana-leaf filtration.",
-        severity=5,
-        category="turbidity",
-        prediction="Mass mortality during molting."
-    )
+    def high_turbidity_crayfish(self, turb):
+        self.add_issue(
+            "⚠️ High turbidity for crayfish! Affects their molting.",
+            "Reduce sediment disturbance and improve filtration. Crayfish need clear water for proper molting.",
+            severity=3,
+            category="turbidity",
+            prediction="Crayfish may have molting problems in very turbid water."
+        )
     
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     logger.debug(f"Received input data: {data}")
 
-    # Required parameters (including turbidity)
-    required_keys = [
-        "ph_level", 
-        "dissolved_oxygen", 
-        "temperature", 
-        "salinity", 
-        "ammonia",
-        "turbidity",  # Make sure this is included
-        "fish_type"   # Also required for rules to work
-    ]
-    
-    # Validate all required keys are present
+    # Updated required keys to include turbidity
+    required_keys = ["ph_level", "dissolved_oxygen", "temperature", "salinity", "ammonia", "turbidity"]
     for key in required_keys:
         if key not in data:
             logger.error(f"Missing key in input data: {key}")
-            return jsonify({
-                "error": f"Missing required parameter: {key}",
-                "required_parameters": required_keys
-            }), 400
-        
-        # Validate parameter types
-        if key != "fish_type" and not isinstance(data[key], (int, float)):
+            return jsonify({"error": f"Missing key in input data: {key}"}), 400
+        if not isinstance(data[key], (int, float)):
             logger.error(f"Invalid {key} value: {data[key]}")
             return jsonify({"error": f"{key} must be a number!"}), 400
-        
-        if key != "fish_type" and data[key] < 0:
+        if data[key] < 0:  # Check for negative values
             logger.error(f"Invalid {key} value: {data[key]} (must be non-negative)")
             return jsonify({"error": f"{key} must be non-negative!"}), 400
 
-    # Set default fish_type if not provided
     fish_type = data.get('fish_type', 'others')
 
-    # Run the prediction engine
     predictor = OxygenPredictor()
     predictor.reset()
-    
-    # Declare all facts (including turbidity)
     predictor.declare(Fact(**data))
-    predictor.declare(Fact(fish_type=fish_type))
-    
+    predictor.declare(Fact(fish_type=fish_type))  # Declare fish_type as a fact
     predictor.run()
     predictor.finalize_decision()
 
-    # Prepare response
     result = {
         "warnings": predictor.most_relevant_warnings,
         "recommendations": predictor.most_relevant_recommendations,
         "positive_feedback": predictor.positive_messages,
         "positive_suggestions": predictor.positive_suggestions,
-        "predictions": predictor.predictions
+        "predictions": predictor.predictions  # Add predictions to the response
     }
-    
     logger.debug(f"Generated result: {result}")
     return jsonify(result)
 
